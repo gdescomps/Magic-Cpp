@@ -1,0 +1,81 @@
+
+
+1. pioche 
+
+draw()
+untapAll()
+
+
+2. demander au joueur les cartes terrain a tap PUIS la carte qu'il veut poser  
+
+type ManaStock = vector<Pair<Mana, int>>
+
+// /!\ faire attention a ne placer qu'un terrain
+
+// récup la mana dispo
+mana : vec<Land*> =  player.getLand().filter(tappable && placed)
+
+// demander la mana a tap
+
+placeables: vec<Card*> = player.getHand().filter(costIsOk)
+
+// demander la carte a poser
+card.place()
+tap la land
+
+3. demander ... pour attaquer
+
+playables = getBoard().
+
+
+
+
+
+3b. demander joueur 2 pour bloquer
+
+
+3c. faire l'attaque
+
+plan = { attacker: player, attacked: player, attacks: vec<{ attack: Creature, block: vec<Creature > }> }
+
+
+4. demander au joueur les cartes qu'il veut poser
+
+
+
+6. repeat
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
