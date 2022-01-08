@@ -1,8 +1,14 @@
 CC=clang++
-CFLAGS=-Wall -Wextra -g
-LDFLAGS=
+CFLAGS=-Wall -Wextra -std=c++20 -g
+LDFLAGS=-lncurses
 
-SRCS=src/Card.cpp
+SRCS=\
+src/Card.cpp \
+src/Creature.cpp \
+src/Interface.cpp \
+src/Player.cpp \
+src/Game.cpp
+
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 
 .PHONY: clean
@@ -10,10 +16,10 @@ OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 all: bin/magic
 
 bin/%.o: src/%.cpp
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(subst .cpp,.o,$(subst src/,bin/,$<))
+	$(CC) $(CFLAGS) -c $< -o $(subst .cpp,.o,$(subst src/,bin/,$<))
 
-bin/magic: $(OBJS)
-	g++ $(OBJS) src/main.cpp -o bin/magic
+bin/magic: $(OBJS) src/main.cpp
+	g++ $(CFLAGS) $(OBJS) src/main.cpp -o bin/magic $(LDFLAGS)
 
 clean:
 	rm -f bin/*.o
