@@ -7,6 +7,8 @@ public:
 Card();
 virtual ~Card();
 
+void print() const;
+
 private:
 
 };
