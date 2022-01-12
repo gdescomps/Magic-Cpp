@@ -16,6 +16,13 @@ Interface::Interface() {
   clear();
   cbreak();
 
+  start_color();
+  init_pair(1, COLOR_BLACK, COLOR_WHITE); // White mana
+  init_pair(2, COLOR_WHITE, COLOR_BLUE); // Blue mana
+  init_pair(3, COLOR_WHITE, COLOR_BLACK); // Black mana
+  init_pair(4, COLOR_WHITE, COLOR_RED); // Red mana
+  init_pair(5, COLOR_WHITE, COLOR_GREEN); // Green mana
+
   int w = getmaxx(stdscr);
   int h = getmaxy(stdscr);
 
@@ -31,6 +38,7 @@ Interface::Interface() {
   wrefresh(wheader);
   wrefresh(wprompt);
   wrefresh(wmain);
+  
 }
 
 Interface::~Interface() {
@@ -138,7 +146,24 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
   wattroff(wrect, A_BOLD);
   mvwhline(wrect, 1, 0, '-', w);
   mvwprintw(wrect, 2, 1, creature->getType().c_str());
-  
+
+  // mana cost
+  auto cost = creature->getCost();
+  int off = w;
+  for(size_t i = 0; i < 5; i++) {
+    Mana m = (Mana)i;
+    int c = cost.get(m);
+    if(c != 0) {
+      tell(std::to_string(i));
+      wattron(wrect, COLOR_PAIR(i + 1));
+      mvwaddch(wrect, 0, --off, c + '0'); 
+      wattroff(wrect, COLOR_PAIR(i + 1));
+    }
+  }
+  if(cost.getAny() != 0) {
+    mvwaddch(wrect, 0, --off, cost.getAny() + '0'); 
+  }
+
   // power / toughness  
   mvwhline(wrect, h - 2, 0, '-', w);
   auto stats = std::to_string(creature->getPower()) + " / " + std::to_string(creature->getToughness());

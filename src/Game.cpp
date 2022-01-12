@@ -46,14 +46,12 @@ Game::Game()
   : player1(makePlayer1Deck()),
   player2(makePlayer2Deck())
 {
-  for(size_t i = 0; i < 3; i++) {
+  for(size_t i = 0; i < 5; i++) {
     player1.getCards<Card>()[i]->setState(Card::State::BATTLEFIELD);
   }
 }
 
 void Game::play() {
-  iface.showWelcome();
-
   Player* activePlayer = &player1;
   iface.tell(getPlayerName(activePlayer) + " starts playing.");
 
