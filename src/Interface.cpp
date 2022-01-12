@@ -49,33 +49,34 @@ void Interface::showWelcome() {
 }
 
 int Interface::showMenu(std::string const& msg, std::vector<std::string> choices) {
-  mvwprintw(wmain, 0, 0, msg.c_str());
-  std::string line(msg.size(), '-');
-  mvwprintw(wmain, 1, 0, line.c_str());
-  
   int selected = -1;
   
   keypad(stdscr, TRUE);
   noecho();
-  int i = 0;
+  int cur = 0;
   bool cont = true;
 
   do {
     hideAll();
+
+    mvwprintw(wmain, 0, 0, msg.c_str());
+    std::string line(msg.size(), '-');
+    mvwprintw(wmain, 1, 0, line.c_str());
+
     for(size_t i = 0; i < choices.size(); i++) {
       std::string box = selected == (int)i ? "[+] " : "[ ] ";
       mvwprintw(wmain, i + 2, 1, box.c_str());
       wprintw(wmain, choices[i].c_str());
     }
     
-    wmove(wmain, i + 2, 2); // move to first box
+    wmove(wmain, cur + 2, 2); // move to first box
     wrefresh(wmain);
     
     int key = getch();
     if(key == '\n') cont = false;
-    else if(key == KEY_UP) { i = std::max(i - 1, 0); }
-    else if(key == KEY_DOWN) { i = std::min(i + 1, (int)choices.size() - 1); }
-    else if(key == ' ') { selected = i == selected ? -1 : i; }
+    else if(key == KEY_UP) { cur = cur == 0 ? (int)choices.size() - 1 : cur - 1; }
+    else if(key == KEY_DOWN) { cur = (cur + 1) % (int)choices.size(); }
+    else if(key == ' ') { selected = cur == selected ? -1 : cur; }
   }
   while(cont);
   
@@ -86,34 +87,35 @@ int Interface::showMenu(std::string const& msg, std::vector<std::string> choices
 }
 
 std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vector<std::string> choices) {
-  mvwprintw(wmain, 0, 0, msg.c_str());
-  std::string line(msg.size(), '-');
-  mvwprintw(wmain, 1, 0, line.c_str());
-  
   std::vector<bool> selected(choices.size());
   std::fill(selected.begin(), selected.end(), false);
   
   keypad(stdscr, TRUE);
   noecho();
-  int i = 0;
+  int cur = 0;
   bool cont = true;
 
   do {
     hideAll();
+    
+    mvwprintw(wmain, 0, 0, msg.c_str());
+    std::string line(msg.size(), '-');
+    mvwprintw(wmain, 1, 0, line.c_str());
+
     for(size_t i = 0; i < choices.size(); i++) {
       std::string box = selected[i] ? "[*] " : "[ ] ";
       mvwprintw(wmain, i + 2, 1, box.c_str());
       wprintw(wmain, choices[i].c_str());
     }
     
-    wmove(wmain, i + 2, 2); // move to first box
+    wmove(wmain, cur + 2, 2); // move to first box
     wrefresh(wmain);
     
     int key = getch();
     if(key == '\n') cont = false;
-    else if(key == KEY_UP) { i = std::max(i - 1, 0); }
-    else if(key == KEY_DOWN) { i = std::min(i + 1, (int)choices.size() - 1); }
-    else if(key == ' ') { selected[i] = !selected[i]; }
+    else if(key == KEY_UP) { cur = cur == 0 ? (int)choices.size() - 1 : cur - 1; }
+    else if(key == KEY_DOWN) { cur = (cur + 1) % (int)choices.size(); }
+    else if(key == ' ') { selected[cur] = !selected[cur]; }
   }
   while(cont);
   
@@ -154,7 +156,6 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
     Mana m = (Mana)i;
     int c = cost.get(m);
     if(c != 0) {
-      tell(std::to_string(i));
       wattron(wrect, COLOR_PAIR(i + 1));
       mvwaddch(wrect, 0, --off, c + '0'); 
       wattroff(wrect, COLOR_PAIR(i + 1));

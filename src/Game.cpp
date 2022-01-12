@@ -140,20 +140,9 @@ bool Game::attackPhase(Player* player) {
   std::erase_if(creatures, [] (Card* c) { return c->isTapped(); });
   
   // ask creatures to use
-  bool cont = true;
-  std::vector<Creature*> used;
-  if(creatures.size() != 0) while(creatures.size() != 0 && cont) {
-    iface.showCards(creatures);
-    std::string resp = iface.prompt("Use a creature? (Press 1-" + std::to_string(creatures.size()) + " or Enter to cancel)");
-    int choice = getInt(resp);
-    
-    if(1 <= choice && choice <= (int)creatures.size()) {
-      Creature* creature = creatures[choice - 1];
-      used.push_back(creature);
-    }
-
-    iface.hideAll();
-  }
+  if(creatures.size() != 0) {
+    std::vector<Creature*> used = iface.selectCards<Creature>("Select creatures to use in attack", creatures);
+  }  
   else {
     iface.tell("No creature to use");
   }

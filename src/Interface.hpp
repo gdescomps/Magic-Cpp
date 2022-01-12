@@ -20,7 +20,7 @@ public:
   void showCard(C const* c);
   
   template<class C>
-  void showCards(std::vector<C*> const& cards);
+  void showCards(std::string const& msg, std::vector<C*> const& cards);
 
   template<class C>
   C* selectCard(std::string const& msg, std::vector<C*> const& cards);
@@ -46,8 +46,8 @@ private:
   WINDOW* wmain;
   void draw();
   
-  int cardW = 20;
-  int cardH = 10;
+  int cardW = 25;
+  int cardH = 15;
 
   template<class C>
   void drawCard(WINDOW* win, C const* card);
@@ -55,59 +55,86 @@ private:
 
 template<class C>
 inline C* Interface::selectCard(std::string const& msg, std::vector<C*> const& cards) {
-  std::vector<std::string> names(cards.size());
-  for(size_t i = 0; i < cards.size(); i++) {
-    names[i] = cards[i]->getName();
-  }
-
-  C* res = nullptr;
+  int selected = -1;
+  
+  keypad(stdscr, TRUE);
+  noecho();
+  int cur = 0;
   bool cont = true;
 
   do {
-    auto selected = showMenu(msg, names);
-    res = selected == -1 ? nullptr : cards[selected];
-        
-    if(res == nullptr) {
-      cont = !promptYesNo("Select nothing?");
+    hideAll();
+
+    mvwprintw(wmain, 0, 0, msg.c_str());
+    std::string line(msg.size(), '-');
+    mvwprintw(wmain, 1, 0, line.c_str());
+
+    for(size_t i = 0; i < cards.size(); i++) {
+      std::string box = selected == (int)i ? "[+] " : "[ ] ";
+      mvwprintw(wmain, i + 2, 1, box.c_str());
+      wprintw(wmain, cards[i]->getName().c_str());
     }
-    else {
-      showCard<C>(res);
-      cont = !promptYesNo("Is this OK?");
-    }
+    
+    wmove(wmain, cur + 2, 2); // move to first box
+    showCard(cards[cur]);
+    wrefresh(wmain);
+    
+    int key = getch();
+    if(key == '\n') cont = false;
+    else if(key == KEY_UP) { cur = cur == 0 ? (int)cards.size() - 1 : cur - 1; }
+    else if(key == KEY_DOWN) { cur = (cur + 1) % (int)cards.size(); }
+    else if(key == ' ') { selected = cur == selected ? -1 : cur; }
   }
   while(cont);
+  
+  echo();
+  hideAll();
 
-  return res;
+  return selected == -1 ? nullptr : cards[selected];
 }
 
 template<class C>
 inline std::vector<C*> Interface::selectCards(std::string const& msg, std::vector<C*> const& cards) {
-  std::vector<std::string> names(cards.size());
-  for(size_t i = 0; i < cards.size(); i++) {
-    names[i] = cards[i]->getName();
-  }
+  std::vector<bool> selected(cards.size());
+  std::fill(selected.begin(), selected.end(), false);
 
-  std::vector<C*> res;
+  keypad(stdscr, TRUE);
+  noecho();
+  int cur = 0;
   bool cont = true;
 
   do {
-    auto selected = showMenuMultiple(msg, names);
-    res.clear();  
-    for(size_t i = 0; i < selected.size(); i++) {
-      if(selected[i]) {
-        res.push_back(cards[i]);
-      }
+    hideAll();
+
+    mvwprintw(wmain, 0, 0, msg.c_str());
+    std::string line(msg.size(), '-');
+    mvwprintw(wmain, 1, 0, line.c_str());
+
+    for(size_t i = 0; i < cards.size(); i++) {
+      std::string box = selected[i] ? "[*] " : "[ ] ";
+      mvwprintw(wmain, i + 2, 1, box.c_str());
+      wprintw(wmain, cards[i]->getName().c_str());
     }
     
-    if(cards.size() == 0) {
-      cont = !promptYesNo("Select nothing?");
-    }
-    else {
-      showCards<C>(res);
-      cont = !promptYesNo("Is this OK?");
-    }
+    wmove(wmain, cur + 2, 2); // move to first box
+    showCard(cards[cur]);
+    wrefresh(wmain);
+    
+    int key = getch();
+    if(key == '\n') cont = false;
+    else if(key == KEY_UP) { cur = cur == 0 ? (int)cards.size() - 1 : cur - 1; }
+    else if(key == KEY_DOWN) { cur = (cur + 1) % (int)cards.size(); }
+    else if(key == ' ') { selected[cur] = !selected[cur]; }
   }
   while(cont);
+  
+  echo();
+  hideAll();
+
+  std::vector<C*> res;
+  for(size_t i = 0; i < selected.size(); i++) {
+    if(selected[i]) res.push_back(cards[i]);
+  }
 
   return res;
 }
@@ -129,24 +156,38 @@ inline void Interface::showCard(C const* card) {
 }
 
 template<class C>
-inline void Interface::showCards(std::vector<C*> const& cards) {
-  int cy = (getmaxy(wmain) - cardH) / 2;
-  int gap = (getmaxx(wmain) - cardW * cards.size()) / (cards.size() + 1);
-  int offset = gap;
+inline void Interface::showCards(std::string const& msg, std::vector<C*> const& cards) {
+  keypad(stdscr, TRUE);
+  noecho();
+  int cur = 0;
+  bool cont = true;
 
-  for(auto card : cards) {
-    WINDOW* wout = derwin(wmain, cardH, cardW, cy, offset);
-    WINDOW* wrect = derwin(wout, cardH - 2, cardW - 2, 1, 1);
-    wborder(wout, 0, 0, 0, 0, 0, 0, 0, 0);
+  do {
+    hideAll();
+
+    mvwprintw(wmain, 0, 0, msg.c_str());
+    std::string line(msg.size(), '-');
+    mvwprintw(wmain, 1, 0, line.c_str());
+
+    for(size_t i = 0; i < cards.size(); i++) {
+      std::string box = cur == (int)i ? "[-] " : "[ ] ";
+      mvwprintw(wmain, i + 2, 1, box.c_str());
+      wprintw(wmain, cards[i]->getName().c_str());
+    }
     
-    drawCard(wrect, card);
-  
-    wrefresh(wout);
-    wrefresh(wrect);
-    delwin(wout);
-    delwin(wrect);
-    offset += gap + cardW;
+    wmove(wmain, cur + 2, 2); // move to first box
+    showCard(cards[cur]);
+    wrefresh(wmain);
+    
+    int key = getch();
+    if(key == '\n') cont = false;
+    else if(key == KEY_UP) { cur = cur == 0 ? (int)cards.size() - 1 : cur - 1; }
+    else if(key == KEY_DOWN) { cur = (cur + 1) % (int)cards.size(); }
   }
+  while(cont);
+  
+  echo();
+  hideAll();
 }
 
 template<> void Interface::drawCard(WINDOW* win, Card const* card);
