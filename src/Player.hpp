@@ -17,15 +17,63 @@ Player(Cards deck);
 
 Card* drawCard();
 
-std::vector<Card*> getCards();
-std::vector<Card*> getCardsInState(Card::State state);
-std::vector<Card*> getPlaceableCards(ManaCost const& cost);
-std::vector<Land*> getLandCards();
-std::vector<Creature*> getCreatureCards();
+template<class C>
+std::vector<C*> getCardsInState(Card::State state);
+
+template<class C>
+std::vector<C*> getPlaceableCards(ManaCost const& cost);
+
+template<class C>
+std::vector<C*> getCards();
 
 void untapAll();
 
 private:
   Cards deck;
 };
+
+template<class C>
+inline std::vector<C*> Player::getCards() {
+  std::vector<C*> res;
+
+  for(size_t i = 0; i < deck.size(); i++) {
+    C* casted = dynamic_cast<C*>(deck[i].get());
+    if(casted != nullptr) res.push_back(casted);
+  }
+
+  return res;
+}
+
+template<>
+inline std::vector<Card*> Player::getCards() {
+  std::vector<Card*> res(deck.size());
+
+  for(size_t i = 0; i < deck.size(); i++) {
+    res[i] = deck[i].get();
+  }
+
+  return res;
+}
+
+template<class C>
+inline std::vector<C*> Player::getCardsInState(Card::State state) {
+  auto cards = getCards<C>();
+
+  std::erase_if(cards, [&] (Card* c) {
+    return c->getState() != state;
+  });
+
+  return cards;
+}
+
+template<class C>
+std::vector<C*> Player::getPlaceableCards(ManaCost const& cost) {
+  auto cards = getCards<C>();
+  
+  std::erase_if(cards, [&] (Card* c) {
+    return c->getState() != Card::State::HAND || !cost.matches(c->getCost());
+  });
+
+  return cards;
+}
 

@@ -17,11 +17,11 @@ public:
   void tap();
   void untap();
   bool isTapped() const;
-
+  
+  virtual std::string getName() const = 0;
+  virtual std::string getType() const = 0;
   virtual ManaCost getCost() const = 0;
-
 private:
   State state;
   bool tapped;
 };
-

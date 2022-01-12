@@ -17,6 +17,9 @@ private:
 
   std::string getPlayerName(Player* p);
   Player* switchPlayer(Player* last);
-  std::vector<Card*> getPlaceables(Player* player);
+  
+  bool drawPhase(Player* player);
+  bool placePhase(Player* player);
+  bool attackPhase(Player* player);
 };
 

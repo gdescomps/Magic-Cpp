@@ -15,7 +15,7 @@ OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 
 all: bin/magic
 
-bin/%.o: src/%.cpp
+bin/%.o: src/%.cpp src/%.hpp
 	$(CC) $(CFLAGS) -c $< -o $(subst .cpp,.o,$(subst src/,bin/,$<))
 
 bin/magic: $(OBJS) src/main.cpp

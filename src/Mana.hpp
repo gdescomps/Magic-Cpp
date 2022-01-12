@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <stddef.h>
 
@@ -7,7 +8,9 @@ enum class Mana { WHITE, BLUE, BLACK, RED, GREEN };
 
 class ManaCost {
 public:
-  ManaCost() {}
+  ManaCost(): anyCost(0) {
+    std::ranges::fill(cost, 0);  
+  }
 
   void add(Mana mana) {
     cost[(size_t)mana]++;
@@ -35,11 +38,13 @@ public:
   
   /** 
    * Wether the mana matches the requirement.
-   * All Mana 
+   *  - each mana must be greater than or equal to the corresponding requirement
+   *  - the remaining mana must match the 'any' requirement
+   *  - the 'any' mana of this ManaCost is ignored  
    */
   bool matches(ManaCost const& requirement) const {
     int remain = 0;
-    for(size_t i = 0; i < cost.size() - 2; i++) {
+    for(size_t i = 0; i < cost.size(); i++) {
       if(requirement.cost[i] > cost[i]) return false;
       remain += cost[i] - requirement.cost[i];
     }

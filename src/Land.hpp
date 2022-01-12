@@ -13,7 +13,7 @@ public:
 
   Mana getMana() const { return mana; }
   
-  std::string getName() const { 
+  std::string getName() const override { 
     static std::array<std::string, 5> const names = {
       "Plains", "Island", "Swamp", "Mountain", "Forest"
     };
@@ -21,7 +21,7 @@ public:
     return names[(size_t)mana]; // using enum indexing order in the lookup of names
   }
   
-  std::string getType() const {
+  std::string getType() const override {
     static std::array<std::string, 5> const names = {
       "White", "Blue", "Black", "Red", "Forest"
     };

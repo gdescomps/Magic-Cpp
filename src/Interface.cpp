@@ -13,6 +13,8 @@ void hcwprintw(WINDOW* win, int y, std::string txt) {
 
 Interface::Interface() {
   initscr();
+  clear();
+  cbreak();
 
   int w = getmaxx(stdscr);
   int h = getmaxy(stdscr);
@@ -38,10 +40,84 @@ Interface::~Interface() {
 void Interface::showWelcome() {
 }
 
+int Interface::showMenu(std::string const& msg, std::vector<std::string> choices) {
+  mvwprintw(wmain, 0, 0, msg.c_str());
+  std::string line(msg.size(), '-');
+  mvwprintw(wmain, 1, 0, line.c_str());
+  
+  int selected = -1;
+  
+  keypad(stdscr, TRUE);
+  noecho();
+  int i = 0;
+  bool cont = true;
 
-void Interface::drawLandCard(WINDOW* wrect, Land const* land) {
+  do {
+    hideAll();
+    for(size_t i = 0; i < choices.size(); i++) {
+      std::string box = selected == (int)i ? "[+] " : "[ ] ";
+      mvwprintw(wmain, i + 2, 1, box.c_str());
+      wprintw(wmain, choices[i].c_str());
+    }
+    
+    wmove(wmain, i + 2, 2); // move to first box
+    wrefresh(wmain);
+    
+    int key = getch();
+    if(key == '\n') cont = false;
+    else if(key == KEY_UP) { i = std::max(i - 1, 0); }
+    else if(key == KEY_DOWN) { i = std::min(i + 1, (int)choices.size() - 1); }
+    else if(key == ' ') { selected = i == selected ? -1 : i; }
+  }
+  while(cont);
+  
+  echo();
+  hideAll();
+
+  return selected;
+}
+
+std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vector<std::string> choices) {
+  mvwprintw(wmain, 0, 0, msg.c_str());
+  std::string line(msg.size(), '-');
+  mvwprintw(wmain, 1, 0, line.c_str());
+  
+  std::vector<bool> selected(choices.size());
+  std::fill(selected.begin(), selected.end(), false);
+  
+  keypad(stdscr, TRUE);
+  noecho();
+  int i = 0;
+  bool cont = true;
+
+  do {
+    hideAll();
+    for(size_t i = 0; i < choices.size(); i++) {
+      std::string box = selected[i] ? "[*] " : "[ ] ";
+      mvwprintw(wmain, i + 2, 1, box.c_str());
+      wprintw(wmain, choices[i].c_str());
+    }
+    
+    wmove(wmain, i + 2, 2); // move to first box
+    wrefresh(wmain);
+    
+    int key = getch();
+    if(key == '\n') cont = false;
+    else if(key == KEY_UP) { i = std::max(i - 1, 0); }
+    else if(key == KEY_DOWN) { i = std::min(i + 1, (int)choices.size() - 1); }
+    else if(key == ' ') { selected[i] = !selected[i]; }
+  }
+  while(cont);
+  
+  echo();
+  hideAll();
+
+  return selected;
+}
+
+template<>
+void Interface::drawCard(WINDOW* wrect, Land const* land) {
   int w = getmaxx(wrect);
-  int h = getmaxy(wrect);
  
   // card header
   wattron(wrect, A_BOLD);
@@ -51,7 +127,8 @@ void Interface::drawLandCard(WINDOW* wrect, Land const* land) {
   mvwprintw(wrect, 2, 1, land->getType().c_str());
 }
 
-void Interface::drawCreatureCard(WINDOW* wrect, Creature const* creature) {
+template<>
+void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
   int w = getmaxx(wrect);
   int h = getmaxy(wrect);
   
@@ -68,54 +145,15 @@ void Interface::drawCreatureCard(WINDOW* wrect, Creature const* creature) {
   mvwprintw(wrect, h - 1, w - stats.size() - 1, stats.c_str());
 }
 
-void Interface::showCard(Card const* card) {
-  int w = 30;
-  int h = 20;
-  int cy = (getmaxy(wmain) - h) / 2;
-  int cx = (getmaxx(wmain) - w) / 2;
-  WINDOW* wout = derwin(wmain, h, w, cy, cx);
-  WINDOW* wrect = derwin(wout, h - 2, w - 2, 1, 1);
-  wborder(wout, 0, 0, 0, 0, 0, 0, 0, 0);
-  
-  drawCard(wrect, card);
-
-  wrefresh(wout);
-  wrefresh(wrect);
-  delwin(wout);
-  delwin(wrect);
-}
-
-void Interface::showCards(std::vector<Card*> const& cards) {
-  int w = 20;
-  int h = 15;
-  int cy = (getmaxy(wmain) - h) / 2;
-  int gap = (getmaxx(wmain) - w * cards.size()) / (cards.size() + 1);
-  int offset = gap;
-
-  for(auto card : cards) {
-    WINDOW* wout = derwin(wmain, h, w, cy, offset);
-    WINDOW* wrect = derwin(wout, h - 2, w - 2, 1, 1);
-    wborder(wout, 0, 0, 0, 0, 0, 0, 0, 0);
-    
-    drawCard(wrect, card);
-  
-    wrefresh(wout);
-    wrefresh(wrect);
-    delwin(wout);
-    delwin(wrect);
-    offset += gap + w;
-  } 
-}
-
+template<>
 void Interface::drawCard(WINDOW* wrect, Card const* card) {  
-  // And now, the ugly part
   if(dynamic_cast<Creature const*>(card)) { 
     auto creature = dynamic_cast<Creature const*>(card);
-    drawCreatureCard(wrect, creature);
+    drawCard(wrect, creature);
   }
   else if(dynamic_cast<Land const*>(card)) {
     auto land = dynamic_cast<Land const*>(card);
-    drawLandCard(wrect, land);
+    drawCard(wrect, land);
   }
   else {
     wattron(wrect, A_BOLD);
@@ -144,4 +182,22 @@ std::string Interface::prompt(std::string const& msg) {
   wrefresh(wprompt);
 
   return buf;
+}
+
+void Interface::tell(std::string const& msg) {
+  int w = getmaxx(wprompt);
+  WINDOW* win = derwin(wprompt, 1, w, 1, 0);
+  mvwprintw(win, 0, 0, msg.c_str());
+  wprintw(win, " (Press any key to continue) > ");
+  wrefresh(win);
+  wgetch(win);
+  werase(win);
+  delwin(win);
+  wrefresh(wprompt);
+}
+
+bool Interface::promptYesNo(std::string const& msg) {
+  std::string resp = prompt(msg + " (Y/n)");
+  std::ranges::transform(resp, resp.begin(), [] (char c) { return std::tolower(c); });
+  return (resp == "yes" || resp == "y" || resp == "");
 }
