@@ -99,6 +99,12 @@ Interface::Interface() {
   init_pair(4, COLOR_WHITE, COLOR_RED); // Red mana
   init_pair(5, COLOR_BLACK, COLOR_GREEN); // Green mana
 
+  init_pair(6, COLOR_WHITE, COLOR_BLACK); // White mana
+  init_pair(7, COLOR_BLUE, COLOR_BLACK); // Blue mana
+  init_pair(8, COLOR_BLACK, COLOR_WHITE); // Black mana
+  init_pair(9, COLOR_RED, COLOR_BLACK); // Red mana
+  init_pair(10, COLOR_GREEN, COLOR_BLACK); // Green mana
+
   int w = getmaxx(stdscr);
   int h = getmaxy(stdscr);
 
@@ -245,9 +251,9 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
     Mana m = (Mana)i;
     int c = cost.get(m);
     if(c != 0) {
-      wattron(wrect, COLOR_PAIR(i + 1));
+      wattron(wrect, COLOR_PAIR(getBgColor(m)));
       mvwaddch(wrect, 0, --off, c + '0'); 
-      wattroff(wrect, COLOR_PAIR(i + 1));
+      wattroff(wrect, COLOR_PAIR(getBgColor(m)));
     }
   }
   if(cost.getAny() != 0) {
@@ -315,4 +321,12 @@ bool Interface::promptYesNo(std::string const& msg) {
   std::string resp = prompt(msg + " (Y/n)");
   std::ranges::transform(resp, resp.begin(), [] (char c) { return std::tolower(c); });
   return (resp == "yes" || resp == "y" || resp == "");
+}
+
+int Interface::getFgColor(Mana m) const {
+  return getBgColor(m) + 5; 
+}
+
+int Interface::getBgColor(Mana m) const {
+  return (int)m + 1;
 }

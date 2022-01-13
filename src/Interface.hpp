@@ -69,6 +69,9 @@ private:
 
   template<class C>
   void drawCard(WINDOW* win, C const* card);
+  
+  int getFgColor(Mana m) const;
+  int getBgColor(Mana m) const;
 };
 
 template<class C>
@@ -163,7 +166,11 @@ inline void Interface::showCard(C const* card) {
   int cx = (getmaxx(wmain) - cardW) / 2;
   WINDOW* wout = derwin(wmain, cardH, cardW, cy, cx);
   WINDOW* wrect = derwin(wout, cardH - 2, cardW - 2, 1, 1);
+  
+  int col = getFgColor(card->getMana());
+  wattron(wout, COLOR_PAIR(col));
   wborder(wout, 0, 0, 0, 0, 0, 0, 0, 0);
+  wattroff(wout, COLOR_PAIR(col));
   
   drawCard(wrect, card);
 

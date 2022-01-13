@@ -18,6 +18,9 @@ public:
     cost.set(Mana::WHITE, 2);
     return cost;
   }
+  Mana getMana() const override {
+    return Mana::WHITE;
+  }
 private:
 
 };
