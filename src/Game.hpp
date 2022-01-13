@@ -19,7 +19,12 @@ private:
   Player* switchPlayer(Player* last);
   
   bool drawPhase(Player* player);
-  bool placePhase(Player* player);
+  bool placeCreature(Player* player);
+  bool placeLand(Player* player);
   bool attackPhase(Player* player);
+  void menuShowCards(Player* player);
+  
+  bool hasPlaceableLands(Player* player);
+  bool hasPlaceableCreatures(Player* player);
 };
 

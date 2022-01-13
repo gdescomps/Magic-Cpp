@@ -79,7 +79,7 @@ bool Game::drawPhase(Player* player) {
   return true;
 }
 
-bool Game::placePhase(Player* player) {
+bool Game::placeLand(Player* player) {
   // find placeable lands
   auto lands = player->getCardsInState<Land>(Card::State::HAND);
   
@@ -89,15 +89,20 @@ bool Game::placePhase(Player* player) {
     if(card != nullptr) {
       card->setState(Card::State::BATTLEFIELD);
       lands.erase(std::ranges::find(lands, card)); // remove placed card from vec of placeable lands
+      return true;
     }
-    iface.hideAll();
   }
+
   else {
     iface.tell("No land to place.");
   }
-  
+
+  return false;
+}
+
+bool Game::placeCreature(Player* player) {
   // find tappable lands
-  lands = player->getCardsInState<Land>(Card::State::BATTLEFIELD);
+  auto lands = player->getCardsInState<Land>(Card::State::BATTLEFIELD);
   std::erase_if(lands, [] (Card* c) { return c->isTapped(); });
 
   ManaCost cost;
@@ -125,13 +130,14 @@ bool Game::placePhase(Player* player) {
     for(Card* card : selected) {
       card->tap();            
       card->setState(Card::State::BATTLEFIELD);
+      return true;
     }
   }
   else {
     iface.tell("No card to place with the tapped mana.");
   }
 
-  return true;
+  return false;
 }
 
 bool Game::attackPhase(Player* player) {
@@ -152,22 +158,75 @@ bool Game::attackPhase(Player* player) {
   return true;
 }
 
+void Game::menuShowCards(Player* player) {
+  int choice = iface.showMenu("What to show?", {
+    "Show hand",
+    "Show battlefield",
+    "Go back",
+  });
+  
+  if(choice == 0) { // show player hand
+    auto msg = getPlayerName(player) + "'s hand";
+    auto cards = player->getCardsInState<Card>(Card::State::HAND);
+    iface.showCards(msg, cards);
+  }
+  
+  else if(choice == 1) { // show battlefield 
+    auto msg = getPlayerName(player) + "'s cards on the battlefield";
+    auto cards = player->getCardsInState<Card>(Card::State::BATTLEFIELD);
+    iface.showCards(msg, cards);
+  }
+}
 bool Game::playTurn(Player* player) {
+  using MenuEntry::State::NORMAL;
+  using MenuEntry::State::DISABLED;
+
   bool cont = drawPhase(player);
-  if(!cont) return false;
-    
   player->untapAll();
   
-  cont = placePhase(player);
-  if(!cont) return false;
-      
-  cont = attackPhase(player);
-  if(!cont) return false;
-      
-  cont = placePhase(player);
-  if(!cont) return false;
+  bool hasAttacked = false;
+  bool canPlaceLand = hasPlaceableLands(player);
+  bool canAttack = hasPlaceableCreatures(player);
+  
+  while(cont) {
+    
+    int choice = iface.showMenu("What to do?", {
+      "Show...",
+      MenuEntry("Place a Land", canPlaceLand ? NORMAL : DISABLED),
+      "Place a Creature",
+      MenuEntry("Attack", canAttack ? NORMAL : DISABLED),
+      "Finish turn",
+    });
+  
+    if(choice == 0) { // show submenu
+      menuShowCards(player);
+    }
+    else if(choice == 1) { // place a land
+      canPlaceLand = placeLand(player);
+      canAttack = !hasAttacked && hasPlaceableCreatures(player);
+    }
+    else if(choice == 2) { // place cards
+      placeCreature(player);
+      canAttack = !hasAttacked && hasPlaceableCreatures(player);
+    }
+    else if(choice == 3) { // attack
+      hasAttacked = attackPhase(player);
+    }
+    else if(choice == 4) { // finish turn
+      return cont;      
+    }
+  }
 
-  return true;
+  return cont;
+}
+
+bool Game::hasPlaceableLands(Player* player) {
+  return player->getCardsInState<Land>(Card::State::HAND).size() != 0;
+}
+
+bool Game::hasPlaceableCreatures(Player* player) {
+  // TODO: tell if enough mana
+  return player->getCardsInState<Creature>(Card::State::HAND).size() != 0;
 }
 
 std::string Game::getPlayerName(Player* p) {

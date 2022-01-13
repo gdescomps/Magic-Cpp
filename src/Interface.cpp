@@ -3,12 +3,88 @@
 #include <ncurses.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #include "Creature.hpp"
 
 void hcwprintw(WINDOW* win, int y, std::string txt) {
   int x = (getmaxx(win) - txt.size()) / 2;
   mvwprintw(win, y, x, txt.c_str());
+}
+
+int selectedIndex(std::vector<MenuEntry> const& entries) {
+  auto it = std::ranges::find_if(entries, [] (MenuEntry const& e) {
+    return e.state == MenuEntry::State::SELECTED;
+  });
+  return it == entries.end() ? -1 : it - entries.begin();
+}
+
+void selectNext(std::vector<MenuEntry>& entries) {
+  auto sel = std::ranges::find_if(entries, [] (MenuEntry const& e) {
+    return e.state == MenuEntry::State::SELECTED;
+  });
+
+  // nothing is selected, select first selectable
+  if(sel == entries.end()) {
+    auto it = std::ranges::find_if(entries, [] (MenuEntry const& e) {
+      return e.state != MenuEntry::State::DISABLED;
+    });
+
+    if(it != entries.end()) {
+      it->state = MenuEntry::State::SELECTED;
+    }
+  }
+  
+  // select next with wrap-around
+  else {
+    sel->state = MenuEntry::State::NORMAL;
+
+    auto it = std::find_if(sel + 1, entries.end(), [] (MenuEntry const& e) {
+      return e.state == MenuEntry::State::NORMAL;
+    });
+
+    if(it == entries.end()) {
+      it = std::ranges::find_if(entries, [] (MenuEntry const& e) {
+        return e.state == MenuEntry::State::NORMAL;
+      });
+    }
+    
+    it->state = MenuEntry::State::SELECTED;
+  }
+}
+
+void selectPrevious(std::vector<MenuEntry>& entries) {
+  auto sel = std::ranges::find_if(entries, [] (MenuEntry const& e) {
+    return e.state == MenuEntry::State::SELECTED;
+  });
+
+  // nothing is selected, select first selectable
+  if(sel == entries.end()) {
+    auto it = std::ranges::find_if(entries, [] (MenuEntry const& e) {
+      return e.state != MenuEntry::State::DISABLED;
+    });
+
+    if(it != entries.end()) {
+      it->state = MenuEntry::State::SELECTED;
+    }
+  }
+ 
+  // select previous with wrap-around
+  else {
+    sel->state = MenuEntry::State::NORMAL;
+
+    auto it = std::find_if(std::reverse_iterator(sel), entries.rend(), [] (MenuEntry const& e) {
+      return e.state == MenuEntry::State::NORMAL;
+    });
+
+    if(it == entries.rend()) {
+      it = std::find_if(entries.rbegin(), entries.rend(), [] (MenuEntry const& e) {
+        return e.state == MenuEntry::State::NORMAL;
+      });
+    }
+    
+    it->state = MenuEntry::State::SELECTED;
+  }
 }
 
 Interface::Interface() {
@@ -21,7 +97,7 @@ Interface::Interface() {
   init_pair(2, COLOR_WHITE, COLOR_BLUE); // Blue mana
   init_pair(3, COLOR_WHITE, COLOR_BLACK); // Black mana
   init_pair(4, COLOR_WHITE, COLOR_RED); // Red mana
-  init_pair(5, COLOR_WHITE, COLOR_GREEN); // Green mana
+  init_pair(5, COLOR_BLACK, COLOR_GREEN); // Green mana
 
   int w = getmaxx(stdscr);
   int h = getmaxy(stdscr);
@@ -48,13 +124,13 @@ Interface::~Interface() {
 void Interface::showWelcome() {
 }
 
-int Interface::showMenu(std::string const& msg, std::vector<std::string> choices) {
-  int selected = -1;
-  
+int Interface::showMenu(std::string const& msg, std::vector<MenuEntry> choices) {
   keypad(stdscr, TRUE);
   noecho();
-  int cur = 0;
   bool cont = true;
+
+  if(selectedIndex(choices) == -1)
+    selectNext(choices);
 
   do {
     hideAll();
@@ -64,32 +140,36 @@ int Interface::showMenu(std::string const& msg, std::vector<std::string> choices
     mvwprintw(wmain, 1, 0, line.c_str());
 
     for(size_t i = 0; i < choices.size(); i++) {
-      std::string box = selected == (int)i ? "[+] " : "[ ] ";
+      std::string box = choices[i].state == MenuEntry::State::NORMAL ? "[ ] "
+                      : choices[i].state == MenuEntry::State::DISABLED ?  "    "
+                      : "[+] ";
       mvwprintw(wmain, i + 2, 1, box.c_str());
-      wprintw(wmain, choices[i].c_str());
+      wprintw(wmain, choices[i].text.c_str());
     }
     
+    int cur = selectedIndex(choices);
     wmove(wmain, cur + 2, 2); // move to first box
     wrefresh(wmain);
     
     int key = getch();
     if(key == '\n') cont = false;
-    else if(key == KEY_UP) { cur = cur == 0 ? (int)choices.size() - 1 : cur - 1; }
-    else if(key == KEY_DOWN) { cur = (cur + 1) % (int)choices.size(); }
-    else if(key == ' ') { selected = cur == selected ? -1 : cur; }
+    else if(key == KEY_UP) { selectPrevious(choices); }
+    else if(key == KEY_DOWN) { selectNext(choices); }
+    else if(key == ' ') { 
+      int i = selectedIndex(choices);
+      if(i != -1) choices[i].state = MenuEntry::State::NORMAL; 
+      choices[cur].state = MenuEntry::State::SELECTED;
+    }
   }
   while(cont);
   
   echo();
   hideAll();
 
-  return selected;
+  return selectedIndex(choices);
 }
 
-std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vector<std::string> choices) {
-  std::vector<bool> selected(choices.size());
-  std::fill(selected.begin(), selected.end(), false);
-  
+std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vector<MenuEntry> choices) {
   keypad(stdscr, TRUE);
   noecho();
   int cur = 0;
@@ -103,9 +183,11 @@ std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vecto
     mvwprintw(wmain, 1, 0, line.c_str());
 
     for(size_t i = 0; i < choices.size(); i++) {
-      std::string box = selected[i] ? "[*] " : "[ ] ";
+      std::string box = choices[i].state == MenuEntry::State::NORMAL ? "[ ] "
+                      : choices[i].state == MenuEntry::State::DISABLED ?  "    "
+                      : "[*] ";
       mvwprintw(wmain, i + 2, 1, box.c_str());
-      wprintw(wmain, choices[i].c_str());
+      wprintw(wmain, choices[i].text.c_str());
     }
     
     wmove(wmain, cur + 2, 2); // move to first box
@@ -115,14 +197,21 @@ std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vecto
     if(key == '\n') cont = false;
     else if(key == KEY_UP) { cur = cur == 0 ? (int)choices.size() - 1 : cur - 1; }
     else if(key == KEY_DOWN) { cur = (cur + 1) % (int)choices.size(); }
-    else if(key == ' ') { selected[cur] = !selected[cur]; }
+    else if(key == ' ') { 
+      auto s = choices[cur].state;
+      choices[cur].state = s == MenuEntry::State::SELECTED ? MenuEntry::State::NORMAL : MenuEntry::State::SELECTED;
+    }
   }
   while(cont);
   
   echo();
   hideAll();
 
-  return selected;
+  std::vector<bool> res(choices.size());
+  for(size_t i = 0; i < choices.size(); i++) {
+    res[i] = (choices[i].state == MenuEntry::State::SELECTED);
+  }
+  return res;
 }
 
 template<>

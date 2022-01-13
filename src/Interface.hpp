@@ -9,6 +9,24 @@
 #include "Creature.hpp"
 #include "Land.hpp"
 
+class MenuEntry {
+
+public:
+  enum class State { NORMAL, SELECTED, DISABLED };  
+
+  MenuEntry(std::string text, State state)
+   : text(text), state(state)
+  {}
+  
+  MenuEntry(char const* text)
+   : text(text), state(State::NORMAL)
+  {}
+  
+  std::string text;
+  State state; 
+};
+
+
 class Interface {
 public:
   Interface();
@@ -36,9 +54,9 @@ public:
 
   bool promptYesNo(std::string const& msg);
 
-  int showMenu(std::string const& msg, std::vector<std::string> choices);
+  int showMenu(std::string const& msg, std::vector<MenuEntry> choices);
 
-  std::vector<bool> showMenuMultiple(std::string const& msg, std::vector<std::string> choices);
+  std::vector<bool> showMenuMultiple(std::string const& msg, std::vector<MenuEntry> choices);
 
 private:
   WINDOW* wheader;
