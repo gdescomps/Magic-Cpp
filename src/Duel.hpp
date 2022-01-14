@@ -2,40 +2,24 @@
 
 #include <vector>
 
-#include "Card.hpp"
-#include "Player.hpp"
+class Creature;
+class Player;
 
 class Duel {
-  
-
-public:
-  
-Duel(
-  Card const* cardAttacker,
-  std::vector<Card const*> cardBlockers,
-  Player const* playerAttacker
-) : cardAttacker(cardAttacker), cardBlockers(cardBlockers), playerAttacker(playerAttacker), 
-    cardAttackerDamage(0), cardBlockersDamages(cardBlockers.size()), playerBlockerDamage(0)
-{}
-
-  int getCardAttackerDamage() const;
-  std::vector<int> getCardBlockersDamages() const;
-  int getPlayerAttackerDamage() const;
-  int getPlayerBlockerDamage() const;
-
-  void setCardAttackerDamage(int damage);
-  void setCardBlockersDamages(std::vector<int> damage);
-  void setPlayerAttackerDamage(int damage);
-  void setPlayerBlockerDamage(int damage);
 
 private:
-  Card const* cardAttacker;
-  std::vector<Card const*> cardBlockers;
-  Player const* playerAttacker;
-  Player const* playerBlocker;
+  Creature* cardAttacker;
+  std::vector<Creature*> cardBlockers;
+  Player* playerAttacker;
+  Player* playerBlocker;
 
-  int cardAttackerDamage;
-  std::vector<int> cardBlockersDamages;
-  int playerAttackerDamage;
-  int playerBlockerDamage;
+public:
+
+  Duel(Creature* cardAttacker, std::vector<Creature*> cardBlockers, Player* playerAttacker, Player* playerBlocker)
+    : cardAttacker(cardAttacker), cardBlockers(cardBlockers), playerAttacker(playerAttacker), playerBlocker(playerBlocker)
+  {}
+
+  Creature* getCardAttacker() {return cardAttacker;}
+  std::vector<Creature*> getCardBlockers() {return cardBlockers;}
+
 };
