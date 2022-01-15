@@ -5,15 +5,20 @@
 #include "creatures/SerraAngel.hpp"
 #include "Land.hpp"
 #include "Mana.hpp"
+#include "Duel.hpp"
 
 std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
   std::vector<std::unique_ptr<Card>> res;
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
   res.push_back(std::make_unique<Land>(Mana::BLUE));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLUE));
   res.push_back(std::make_unique<Land>(Mana::WHITE));
   res.push_back(std::make_unique<Land>(Mana::WHITE));
-  res.push_back(std::make_unique<SerraAngel>());
   res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::RED));
@@ -22,6 +27,11 @@ std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
 
 std::vector<std::unique_ptr<Card>> makePlayer2Deck() {
   std::vector<std::unique_ptr<Card>> res;
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<SerraAngel>());
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
@@ -105,17 +115,17 @@ bool Game::placeCreature(Player* player) {
   auto lands = player->getCardsInState<Land>(Card::State::BATTLEFIELD);
   std::erase_if(lands, [] (Card* c) { return c->isTapped(); });
 
+  if(lands.size() == 0) {
+    iface.tell("No tappable land.");
+    return false;
+  }
+
   ManaCost cost;
 
   // ask lands to tap and build ManaCost
-  if(lands.size() != 0) {
-    auto selected = iface.selectCards("Tap lands?", lands);
-    for(Land* land : selected) {
-      cost.add(land->getMana());
-    }
-  }
-  else {
-    iface.tell("No tappable land.");
+  auto selectedLands = iface.selectCards("Tap lands?", lands);
+  for(Land* land : selectedLands) {
+    cost.add(land->getMana());
   }
 
   // find placeable cards (except lands)
@@ -124,57 +134,116 @@ bool Game::placeCreature(Player* player) {
     return dynamic_cast<Land*>(c) != nullptr;
   });  
   
-  // ask to place a card
-  if(placeables.size() != 0) {
-    auto selected = iface.selectCards("Use cards?", placeables);
-    for(Card* card : selected) {
-      card->tap();            
-      card->setState(Card::State::BATTLEFIELD);
-      return true;
-    }
-  }
-  else {
+  if(placeables.size() == 0) {
     iface.tell("No card to place with the tapped mana.");
+  }
+
+  // ask to place a card
+  auto selectedCards = iface.selectCards("Use cards?", placeables);
+  for(Card* card : selectedCards) {
+    card->tap();            
+    card->setState(Card::State::BATTLEFIELD);
+    return true;
   }
 
   return false;
 }
 
 bool Game::attackPhase(Player* player) {
-  // find creatures usable in attack
-  auto creatures = player->getCardsInState<Creature>(Card::State::BATTLEFIELD);
-  std::erase_if(creatures, [] (Card* c) { return c->isTapped(); });
+  std::vector<std::pair<Creature*, std::vector<Creature*>>> duels;  
   
-  // ask creatures to use
-  if(creatures.size() != 0) {
-    std::vector<Creature*> used = iface.selectCards<Creature>("Select creatures to use in attack", creatures);
-  }  
-  else {
-    iface.tell("No creature to use");
+  // find creatures usable in attack
+  auto availAttackers = player->getCardsInState<Creature>(Card::State::BATTLEFIELD);
+  std::erase_if(availAttackers, [] (Card* c) { return c->isTapped(); });
+
+  if(availAttackers.size() == 0) {
+    iface.tell("No creature to use in attack");
+    return false;
   }
 
+  // ask creatures to use
+  std::vector<Creature*> attackers = iface.selectCards<Creature>("Select creatures to use in attack", availAttackers);
+
+  // find creatures usable as blockers
   Player* adversary = switchPlayer(player);
+  auto availBlockers = adversary->getCardsInState<Creature>(Card::State::BATTLEFIELD);
+  std::erase_if(availBlockers, [] (Card* c) { return c->isTapped(); });
+
+  // ask adversary for blockers
+  while(attackers.size() != 0 && availBlockers.size() != 0) {
+
+    // choose an attacker
+    Creature* attacker = iface.selectCard(getPlayerName(adversary) + ", choose a card to block", attackers);
+    if(attacker == nullptr) {
+      bool resp = iface.promptYesNo("Finished choosing blockers?");
+      if(resp) break;
+    }
     
+    // choose blockers
+    auto blockers = iface.selectCards("Choose cards to block this attacker", availBlockers);
+    
+    // create the duel and remove attacker / blockers
+    if(blockers.size() != 0) {
+      duels.emplace_back(attacker, blockers);
+      attackers.erase(std::ranges::find(attackers, attacker));
+      for(auto blocker : blockers) {
+        availBlockers.erase(std::ranges::find(availBlockers, blocker));
+      }
+    }
+    
+    // ask player to order attacks for duels with multiple blockers
+    for(auto& duel : duels) if(duel.second.size() >= 2) {
+      for(size_t i = 0; i < duel.second.size() - 1; i++) {
+        Card* card;
+        do card = iface.selectCard("Choose the " + getOrdinal(i) + " card to attack with your " + duel.first->getName(), duel.second);
+        while(card == nullptr);
+        std::iter_swap(duel.second.begin() + i, std::ranges::find(duel.second, card));
+      }
+    }
+  }
+  
+  // TODO Perform the DUELS
+  
   return true;
 }
 
 void Game::menuShowCards(Player* player) {
   int choice = iface.showMenu("What to show?", {
-    "Show hand",
-    "Show battlefield",
+    "Show your hand",
+    "Show your battlefield",
+    "Show adversary battlefield",
     "Go back",
   });
   
   if(choice == 0) { // show player hand
     auto msg = getPlayerName(player) + "'s hand";
     auto cards = player->getCardsInState<Card>(Card::State::HAND);
-    iface.showCards(msg, cards);
+
+    if(cards.size() > 0)
+      iface.showCards(msg, cards);
+    else 
+      iface.tell("Hand is empty");
   }
   
   else if(choice == 1) { // show battlefield 
     auto msg = getPlayerName(player) + "'s cards on the battlefield";
     auto cards = player->getCardsInState<Card>(Card::State::BATTLEFIELD);
-    iface.showCards(msg, cards);
+
+    if(cards.size() > 0)
+      iface.showCards(msg, cards);
+    else 
+      iface.tell("Battlefield is empty");
+  }
+  
+  else if(choice == 2) { // show adversary battlefield 
+    auto adversary = switchPlayer(player);
+    auto msg = getPlayerName(adversary) + "'s cards on the battlefield";
+    auto cards = adversary->getCardsInState<Card>(Card::State::BATTLEFIELD);
+
+    if(cards.size() > 0)
+      iface.showCards(msg, cards);
+    else 
+      iface.tell("Battlefield is empty");
   }
 }
 bool Game::playTurn(Player* player) {
@@ -183,10 +252,16 @@ bool Game::playTurn(Player* player) {
 
   bool cont = drawPhase(player);
   player->untapAll();
+
+  auto hasAttackCreatures = [&] () {
+    auto creatures = player->getCardsInState<Creature>(Card::State::BATTLEFIELD);
+    auto isUntapped = [] (auto* card) { return !card->isTapped(); };
+    return std::ranges::find_if(creatures, isUntapped) != creatures.end();
+  };
   
   bool hasAttacked = false;
-  bool canPlaceLand = hasPlaceableLands(player);
-  bool canAttack = hasPlaceableCreatures(player);
+  bool canPlaceLand = player->getCardsInState<Land>(Card::State::HAND).size() != 0;
+  bool canAttack = hasAttackCreatures();
   
   while(cont) {
     
@@ -203,11 +278,11 @@ bool Game::playTurn(Player* player) {
     }
     else if(choice == 1) { // place a land
       canPlaceLand = placeLand(player);
-      canAttack = !hasAttacked && hasPlaceableCreatures(player);
+      canAttack = !hasAttacked && hasAttackCreatures();
     }
     else if(choice == 2) { // place cards
       placeCreature(player);
-      canAttack = !hasAttacked && hasPlaceableCreatures(player);
+      canAttack = !hasAttacked && hasAttackCreatures();
     }
     else if(choice == 3) { // attack
       hasAttacked = attackPhase(player);
@@ -224,13 +299,15 @@ bool Game::hasPlaceableLands(Player* player) {
   return player->getCardsInState<Land>(Card::State::HAND).size() != 0;
 }
 
-bool Game::hasPlaceableCreatures(Player* player) {
-  // TODO: tell if enough mana
-  return player->getCardsInState<Creature>(Card::State::HAND).size() != 0;
-}
-
 std::string Game::getPlayerName(Player* p) {
   return p == &player1 ? "Player 1" : "Player 2";
+}
+
+std::string Game::getOrdinal(int i) {
+  if(i == 1) return "1st";
+  else if(i == 2) return "2nd";
+  else if(i == 3) return "3rd";
+  else return std::to_string(i) + "th";
 }
 
 Player* Game::switchPlayer(Player* last) {

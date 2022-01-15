@@ -4,7 +4,8 @@
 
 int main(int /* argc */, char const** /* argv */) {
   Game g;
-  g.play();  
+  g.play();
+  true;
 
   return 0;
 }
