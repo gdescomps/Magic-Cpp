@@ -8,12 +8,14 @@
 #include "Creature.hpp"
 #include "Mana.hpp"
 
-class Player {
-
 using Cards = std::vector<std::unique_ptr<Card>>; 
 
+class Player {
 public:
 Player(Cards deck);
+  
+Player(Player const&) = delete;
+Player& operator=(Player const&) = delete;
 
 Card* drawCard();
 

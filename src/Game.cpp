@@ -1,10 +1,17 @@
 #include <memory>
 #include <algorithm>
+#include <random>
 
 #include "Game.hpp"
 #include "creatures/SerraAngel.hpp"
 #include "Land.hpp"
 #include "Mana.hpp"
+
+void shuffleDeck(Cards& deck) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::ranges::shuffle(deck, gen);
+}
 
 std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
   std::vector<std::unique_ptr<Card>> res;
@@ -17,6 +24,7 @@ std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
   res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::RED));
+  shuffleDeck(res);
   return res;
 }
 
@@ -30,6 +38,7 @@ std::vector<std::unique_ptr<Card>> makePlayer2Deck() {
   res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::RED));
+  shuffleDeck(res);
   return res;
 }
 
@@ -44,16 +53,17 @@ int getInt(std::string s) {
 
 Game::Game()
   : player1(makePlayer1Deck()),
-  player2(makePlayer2Deck())
+    player2(makePlayer2Deck())
 {
-  for(size_t i = 0; i < 3; i++) {
-    player1.getCards<Card>()[i]->setState(Card::State::BATTLEFIELD);
+  for(size_t i = 0; i < 7; i++) {
+    player1.drawCard();
+    player2.drawCard();
   }
 }
 
 void Game::play() {
   iface.showWelcome();
-
+  
   Player* activePlayer = &player1;
   iface.tell(getPlayerName(activePlayer) + " starts playing.");
 
