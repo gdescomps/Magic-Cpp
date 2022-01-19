@@ -1,6 +1,7 @@
 #include "Card.hpp"
 
 #include <iostream>
+#include <algorithm>
 
 Card::Card()
   : state(State::LIBRARY)
@@ -28,4 +29,9 @@ void Card::untap() {
 
 bool Card::isTapped() const {
   return tapped;
+}
+
+bool Card::hasAbility(Ability const* ability) const {
+  auto abilities = getAbilities();
+  return std::ranges::find(abilities, ability) != abilities.end();
 }

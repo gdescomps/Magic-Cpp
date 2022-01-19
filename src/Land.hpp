@@ -11,7 +11,7 @@ class Land : public Card {
 public:
   Land(Mana mana) : mana(mana) {} 
 
-  Mana getMana() const { return mana; }
+  Mana getMana() const override { return mana; }
   
   std::string getName() const override { 
     static std::array<std::string, 5> const names = {

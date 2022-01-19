@@ -6,7 +6,7 @@ class SerraAngel : public Creature {
 
 public:
 
-  SerraAngel(): Creature(4,4) {}
+  SerraAngel(): Creature(4, 4) {}
 
   std::string getName() const override { return "Serra Angel"; }
   std::string getType() const override { return Creature::getType() + " - Angel"; }
@@ -18,5 +18,9 @@ public:
     cost.set(Mana::WHITE, 2);
     return cost;
   }
+  Mana getMana() const override {
+    return Mana::WHITE;
+  }
+private:
 
 };
