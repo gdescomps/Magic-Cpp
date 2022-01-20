@@ -11,7 +11,7 @@ src/Game.cpp
 
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 
-.PHONY: clean
+.PHONY: clean rapport
 
 all: bin/magic
 
@@ -20,6 +20,11 @@ bin/%.o: src/%.cpp src/%.hpp
 
 bin/magic: $(OBJS) src/main.cpp
 	g++ $(CFLAGS) $(OBJS) src/main.cpp -o bin/magic $(LDFLAGS)
+
+docs/rapport/rapport.pdf: docs/rapport/rapport.md
+	cd docs/rapport && pandoc rapport.md -o rapport.pdf
+	
+rapport: docs/rapport/rapport.pdf
 
 clean:
 	rm -f bin/*.o
