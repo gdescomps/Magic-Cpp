@@ -4,10 +4,19 @@
 #include <random>
 
 #include "Game.hpp"
-#include "creatures/SerraAngel.hpp"
 #include "Land.hpp"
 #include "Mana.hpp"
 #include "Duel.hpp"
+
+#include "creatures/AirBender.hpp"
+#include "creatures/BrandonSoupSirup.hpp"
+#include "creatures/CrownTheVirulent.hpp"
+#include "creatures/JackSeparou.hpp"
+#include "creatures/LeojTheMerciful.hpp"
+#include "creatures/PolyNinja.hpp"
+#include "creatures/RatMan.hpp"
+#include "creatures/SerraAngel.hpp"
+#include "creatures/Theresa.hpp"
 
 void shuffleDeck(Cards& deck) {
   std::random_device rd;
@@ -15,42 +24,58 @@ void shuffleDeck(Cards& deck) {
   std::ranges::shuffle(deck, gen);
 }
 
+Player* randomPlayer(Player* p1, Player* p2) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distrib(0, 1);
+  return distrib(gen) ? p1 : p2;
+}
+
 std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
   std::vector<std::unique_ptr<Card>> res;
+  res.push_back(std::make_unique<AirBender>());
+  res.push_back(std::make_unique<BrandonSoupSirup>());
+  res.push_back(std::make_unique<CrownTheVirulent>());
+  res.push_back(std::make_unique<JackSeparou>());
+  res.push_back(std::make_unique<LeojTheMerciful>());
+  res.push_back(std::make_unique<PolyNinja>());
+  res.push_back(std::make_unique<RatMan>());
   res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<Land>(Mana::BLUE));
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Land>(Mana::BLACK));
+  res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLUE));
+  res.push_back(std::make_unique<Land>(Mana::BLUE));
+  res.push_back(std::make_unique<Land>(Mana::BLUE));
+  res.push_back(std::make_unique<Land>(Mana::GREEN));
+  res.push_back(std::make_unique<Land>(Mana::GREEN));
+  res.push_back(std::make_unique<Land>(Mana::GREEN));
+  res.push_back(std::make_unique<Land>(Mana::RED));
+  res.push_back(std::make_unique<Land>(Mana::RED));
+  res.push_back(std::make_unique<Land>(Mana::RED));
   res.push_back(std::make_unique<Land>(Mana::WHITE));
   res.push_back(std::make_unique<Land>(Mana::WHITE));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  shuffleDeck(res);
+  res.push_back(std::make_unique<Land>(Mana::WHITE));
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Theresa>());
+  // shuffleDeck(res);
   return res;
 }
 
 std::vector<std::unique_ptr<Card>> makePlayer2Deck() {
-  std::vector<std::unique_ptr<Card>> res;
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<Land>(Mana::BLACK));
-  res.push_back(std::make_unique<Land>(Mana::BLACK));
-  res.push_back(std::make_unique<Land>(Mana::BLACK));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  shuffleDeck(res);
-  return res;
+  return makePlayer1Deck();
 }
 
 int getInt(std::string s) {
@@ -66,23 +91,42 @@ Game::Game()
   : player1(makePlayer1Deck()),
     player2(makePlayer2Deck())
 {
-  for(size_t i = 0; i < 7; i++) {
-    player1.drawCard();
-    player2.drawCard();
+  // TODO: this is temporary
+  for(Land* land : player1.getCards<Land>()) {
+    land->setState(Card::State::BATTLEFIELD);
+  }
+  for(Land* land : player2.getCards<Land>()) {
+    land->setState(Card::State::BATTLEFIELD);
+  }
+  for(size_t i = 0; i < 4; i++) {
+    player1.getCardsInState<Creature>(Card::State::LIBRARY).at(0)->setState(Card::State::BATTLEFIELD);
+    player2.getCardsInState<Creature>(Card::State::LIBRARY).at(0)->setState(Card::State::BATTLEFIELD);
   }
 }
 
 void Game::play() {
-  Player* activePlayer = &player1;
-  iface.tell(getPlayerName(activePlayer) + " starts playing.");
-
-  while(playTurn(activePlayer)) {
-    activePlayer = switchPlayer(activePlayer);
-    iface.tell(getPlayerName(activePlayer) + " starts playing.");
+  
+  // random starting player
+  Player* player = randomPlayer(&player1, &player2);
+  Player* adversary = switchPlayer(player);
+  
+  // draw cards
+  for(size_t i = 0; i < 6; i++) { // 1 less card for starting player
+    player->drawCard();
+  }
+  for(size_t i = 0; i < 7; i++) {
+    adversary->drawCard();
   }
 
-  activePlayer = switchPlayer(activePlayer);
-  iface.tell("Game has ended, " + getPlayerName(activePlayer) + " wins.");
+  iface.tell(getPlayerName(player) + " starts playing.");
+
+  while(playTurn(player)) {
+    player = switchPlayer(player);
+    iface.tell(getPlayerName(player) + " starts playing.");
+  }
+
+  player = switchPlayer(player);
+  iface.tell("Game has ended, " + getPlayerName(player) + " wins.");
 }
 
 bool Game::drawPhase(Player* player) {
@@ -150,6 +194,7 @@ bool Game::placeCreature(Player* player) {
 
   if(placeables.size() == 0) {
     iface.tell("No card to place with the tapped mana.");
+    return false;
   }
 
   // ask to place a card
@@ -193,14 +238,15 @@ bool Game::attackPhase(Player* player) {
     if(attacker == nullptr) {
       bool resp = iface.promptYesNo("Finished choosing blockers?");
       if(resp) break;
+      else continue;
     }
 
     // choose blockers
     auto blockers = iface.selectCards("Choose cards to block this attacker", availBlockers);
 
     // create the duel and remove attacker / blockers
+    duels.emplace_back(attacker, blockers);
     if(blockers.size() != 0) {
-      duels.emplace_back(attacker, blockers);
       attackers.erase(std::ranges::find(attackers, attacker));
       for(auto blocker : blockers) {
         availBlockers.erase(std::ranges::find(availBlockers, blocker));
@@ -216,6 +262,11 @@ bool Game::attackPhase(Player* player) {
         std::iter_swap(duel.second.begin() + i, std::ranges::find(duel.second, card));
       }
     }
+  }
+  
+  // add remaining attackers
+  for(Creature* attacker : attackers) {
+    duels.emplace_back(attacker, std::vector<Creature*>{});
   }
 
   // Perform the DUELS
@@ -252,13 +303,20 @@ bool Game::attackPhase(Player* player) {
 
 void Game::menuShowCards(Player* player) {
   int choice = iface.showMenu("What to show?", {
+    "Show HP",
     "Show your hand",
     "Show your battlefield",
     "Show adversary battlefield",
     "Go back",
   });
+  
+  if(choice == 0) { // show HP
+    auto msg = getPlayerName(&player1) + "'s HP: " + std::to_string(player1.getHP()) + ", "
+             + getPlayerName(&player2) + "'s HP: " + std::to_string(player2.getHP()); 
+    iface.tell(msg);
+  }
 
-  if(choice == 0) { // show player hand
+  else if(choice == 1) { // show player hand
     auto msg = getPlayerName(player) + "'s hand";
     auto cards = player->getCardsInState<Card>(Card::State::HAND);
 
@@ -268,7 +326,7 @@ void Game::menuShowCards(Player* player) {
       iface.tell("Hand is empty");
   }
 
-  else if(choice == 1) { // show battlefield
+  else if(choice == 2) { // show battlefield
     auto msg = getPlayerName(player) + "'s cards on the battlefield";
     auto cards = player->getCardsInState<Card>(Card::State::BATTLEFIELD);
 
@@ -278,7 +336,7 @@ void Game::menuShowCards(Player* player) {
       iface.tell("Battlefield is empty");
   }
 
-  else if(choice == 2) { // show adversary battlefield
+  else if(choice == 3) { // show adversary battlefield
     auto adversary = switchPlayer(player);
     auto msg = getPlayerName(adversary) + "'s cards on the battlefield";
     auto cards = adversary->getCardsInState<Card>(Card::State::BATTLEFIELD);
@@ -289,6 +347,7 @@ void Game::menuShowCards(Player* player) {
       iface.tell("Battlefield is empty");
   }
 }
+
 bool Game::playTurn(Player* player) {
   using MenuEntry::State::NORMAL;
   using MenuEntry::State::DISABLED;
@@ -329,6 +388,7 @@ bool Game::playTurn(Player* player) {
     }
     else if(choice == 3) { // attack
       hasAttacked = attackPhase(player);
+      canAttack &= !hasAttacked;
     }
     else if(choice == 4) { // finish turn
       return cont;

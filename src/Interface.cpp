@@ -93,15 +93,15 @@ Interface::Interface() {
   cbreak();
 
   start_color();
-  init_pair(1, COLOR_BLACK, COLOR_WHITE); // White mana
+  init_pair(1, COLOR_BLACK, COLOR_YELLOW); // White mana
   init_pair(2, COLOR_WHITE, COLOR_BLUE); // Blue mana
-  init_pair(3, COLOR_WHITE, COLOR_BLACK); // Black mana
+  init_pair(3, COLOR_BLACK, COLOR_MAGENTA); // Black mana
   init_pair(4, COLOR_WHITE, COLOR_RED); // Red mana
   init_pair(5, COLOR_BLACK, COLOR_GREEN); // Green mana
 
-  init_pair(6, COLOR_WHITE, COLOR_BLACK); // White mana
+  init_pair(6, COLOR_YELLOW, COLOR_BLACK); // White mana
   init_pair(7, COLOR_BLUE, COLOR_BLACK); // Blue mana
-  init_pair(8, COLOR_BLACK, COLOR_WHITE); // Black mana
+  init_pair(8, COLOR_MAGENTA, COLOR_BLACK); // Black mana
   init_pair(9, COLOR_RED, COLOR_BLACK); // Red mana
   init_pair(10, COLOR_GREEN, COLOR_BLACK); // Green mana
 

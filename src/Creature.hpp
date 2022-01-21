@@ -21,6 +21,7 @@ public:
     virtual std::string getType() const override { return "Creature"; }
 
     int getPower() const { return this->power; }
+    void setPower(int p) { this->power = p; }
 
     int getToughness() const { return this->toughness; }
     void setToughness(int t) { this->toughness = t; }

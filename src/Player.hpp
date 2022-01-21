@@ -66,7 +66,7 @@ template<class C>
 inline std::vector<C*> Player::getCardsInState(Card::State state) {
   auto cards = getCards<C>();
 
-  std::erase_if(cards, [&] (Card* c) {
+  std::erase_if(cards, [=] (Card* c) {
     return c->getState() != state;
   });
 

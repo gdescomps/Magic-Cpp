@@ -11,10 +11,11 @@ void Duel::performDuel() {
       
       // perform the attack simultaneously on the attacker & blocker
       attacker->setToughness(std::max(0, attackerToughness - blockerPower));
+      attacker->setPower(std::max(0, attackerPower - blockerToughness));
       blocker->setToughness(std::max(0, blockerToughness - attackerPower));
-    
-      // deal excess damage to the adversary
-      int attackerExcess = std::min(0, attackerPower - blockerToughness);
-      adversary->setHP(std::max(0, adversary->getHP() - attackerExcess));
+      blocker->setPower(std::max(0, blockerPower - attackerToughness));
     }
+    
+    // deal excess damage to the adversary
+    adversary->setHP(std::max(0, adversary->getHP() - attacker->getPower()));
   }
