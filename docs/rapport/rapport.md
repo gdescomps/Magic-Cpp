@@ -1,7 +1,3 @@
-% Projet ET4 C++ -- Magic: The Gathering
-% Guillaume Descomps;Mathis Brossier
-% 21 Janvier 2022
-
 # 1. Présentation
 
 Pour ce projet, nous nous sommes concentrés sur le développement de la *base* imposée par l'énoncé vu le peu de temps disponible.
@@ -80,6 +76,8 @@ Le projet dépend de la bibliothèque ncurses qui est installée par défaut sur
 \newpage
 
 # 7. Diagrammes UML
+
+![UML prévisionnel](uml.png)
 
 <!--  ![](../html/classCapacity__coll__graph.png) (peut être pas l'inclure pour l'instant comme la classe est pas encore utilisée) -->
 

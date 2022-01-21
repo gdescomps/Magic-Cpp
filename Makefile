@@ -22,7 +22,7 @@ bin/magic: $(OBJS) src/main.cpp
 	g++ $(CFLAGS) $(OBJS) src/main.cpp -o bin/magic $(LDFLAGS)
 
 docs/rapport/rapport.pdf: docs/rapport/rapport.md
-	cd docs/rapport && pandoc rapport.md -o rapport.pdf
+	cd docs/rapport && pandoc -V papersize:a4 -V geometry:margin=2cm rapport.md -o rapport.pdf
 	
 rapport: docs/rapport/rapport.pdf
 
