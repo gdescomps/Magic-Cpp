@@ -274,6 +274,14 @@ bool Game::attackPhase(Player* player) {
     Duel duel(d.first, d.second, player, adversary);
     duel.performDuel();
     
+    // reset cards stats
+    d.first->setPower(d.first->getBasePower());
+    d.first->setToughness(d.first->getBaseToughness());
+    for(Creature* blocker : d.second) {
+      blocker->setPower(blocker->getBasePower());
+      blocker->setToughness(blocker->getBaseToughness());
+    }
+    
     // Move dead blockers to Graveyard
     std::vector<Creature*> deadBlockers = duel.blockers;
     std::erase_if(deadBlockers, [] (Creature* blocker) {
