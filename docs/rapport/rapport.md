@@ -81,7 +81,7 @@ Le projet dépend de la bibliothèque ncurses qui est installée par défaut sur
 
 # 7. Diagrammes UML
 
-![](../html/classCapacity__coll__graph.png)
+<!--  ![](../html/classCapacity__coll__graph.png) (peut être pas l'inclure pour l'instant comme la classe est pas encore utilisée) -->
 
 ![](../html/classManaCost__coll__graph.png)
 
