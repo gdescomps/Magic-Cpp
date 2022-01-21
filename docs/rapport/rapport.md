@@ -61,7 +61,6 @@ Nous prévoyons d'ajouter des abilités et éventuellement un serveur multijoueu
 
 Nous n'avons pas eu le temps de faire beaucoup de tests pour l'instant.
 
-
 # 5. Difficultés rencontrées
 
 Sur l'organisation, nous avons des visions différentes sur les principes OO tels que l'extensibilité et l'héritage, ce qui a rendu l'établissement de l'UML compliqué.
@@ -77,3 +76,19 @@ Un *Makefile* est disponible. Il compile les `.o` et l'exécutable final dans le
 
 La compilation requiert un compilateur de c++ supportant la norme c++20. Le makefile est configuré pour utiliser `clang++`.
 Le projet dépend de la bibliothèque ncurses qui est installée par défaut sur la plupart des distributions linux.
+
+\newpage
+
+# 7. Diagrammes UML
+
+![](../html/classCapacity__coll__graph.png)
+
+![](../html/classManaCost__coll__graph.png)
+
+![](../html/classMenuEntry__coll__graph.png)
+
+![](../html/classCard__inherit__graph.png)
+
+![](../html/classDuel__coll__graph.png)
+
+![](../html/classGame__coll__graph.png)
