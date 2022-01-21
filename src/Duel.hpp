@@ -7,19 +7,15 @@ class Player;
 
 class Duel {
 
-private:
-  Creature* cardAttacker;
-  std::vector<Creature*> cardBlockers;
-  Player* playerAttacker;
-  Player* playerBlocker;
-
 public:
+  Creature* attacker;
+  std::vector<Creature*> blockers;
+  Player* player;
+  Player* adversary;
 
-  Duel(Creature* cardAttacker, std::vector<Creature*> cardBlockers, Player* playerAttacker, Player* playerBlocker)
-    : cardAttacker(cardAttacker), cardBlockers(cardBlockers), playerAttacker(playerAttacker), playerBlocker(playerBlocker)
+  Duel(Creature* attacker, std::vector<Creature*> blockers, Player* player, Player* adversary)
+    : attacker(attacker), blockers(blockers), player(player), adversary(adversary)
   {}
-
-  Creature* getCardAttacker() {return cardAttacker;}
-  std::vector<Creature*> getCardBlockers() {return cardBlockers;}
-
+  
+  void performDuel();
 };

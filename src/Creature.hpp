@@ -25,6 +25,6 @@ public:
     int getToughness() const { return this->toughness; }
     void setToughness(int t) { this->toughness = t; }
 
-    virtual void attack(Duel* d);
+    virtual void attack(Creature* adversary);
 
 };

@@ -12,26 +12,31 @@ using Cards = std::vector<std::unique_ptr<Card>>;
 
 class Player {
 public:
-Player(Cards deck);
+  Player(Cards deck);
+    
+  Player(Player const&) = delete;
+  Player& operator=(Player const&) = delete;
   
-Player(Player const&) = delete;
-Player& operator=(Player const&) = delete;
+  Card* drawCard();
+  
+  void untapAll();
 
-Card* drawCard();
-
-template<class C>
-std::vector<C*> getCardsInState(Card::State state);
-
-template<class C>
-std::vector<C*> getPlaceableCards(ManaCost const& cost);
-
-template<class C>
-std::vector<C*> getCards();
-
-void untapAll();
+  int getHP() const { return hp; }
+  void setHP(int hp) { this->hp = hp; }
+  
+  template<class C>
+  std::vector<C*> getCardsInState(Card::State state);
+  
+  template<class C>
+  std::vector<C*> getPlaceableCards(ManaCost const& cost);
+  
+  template<class C>
+  std::vector<C*> getCards();
+  
 
 private:
   Cards deck;
+  int hp;
 };
 
 template<class C>

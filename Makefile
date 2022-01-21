@@ -7,6 +7,7 @@ src/Card.cpp \
 src/Creature.cpp \
 src/Interface.cpp \
 src/Player.cpp \
+src/Duel.cpp \
 src/Game.cpp
 
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))

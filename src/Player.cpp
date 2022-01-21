@@ -3,7 +3,7 @@
 #include <algorithm>
 
 Player::Player(Cards deck)
-  : deck(move(deck)) 
+  : deck(move(deck)), hp(20)
 {}
 
 Card* Player::drawCard() {

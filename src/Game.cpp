@@ -1,5 +1,6 @@
 #include <memory>
 #include <algorithm>
+#include <numeric>
 #include <random>
 
 #include "Game.hpp"
@@ -111,6 +112,9 @@ bool Game::placeLand(Player* player) {
       lands.erase(std::ranges::find(lands, card)); // remove placed card from vec of placeable lands
       return true;
     }
+    else {
+      iface.tell("No land was placed.");
+    }
   }
 
   else {
@@ -160,6 +164,9 @@ bool Game::placeCreature(Player* player) {
 }
 
 bool Game::attackPhase(Player* player) {
+  Player* adversary = switchPlayer(player);
+  auto p1Name = getPlayerName(player);
+  auto p2Name = getPlayerName(adversary);
   std::vector<std::pair<Creature*, std::vector<Creature*>>> duels;
 
   // find creatures usable in attack
@@ -175,7 +182,6 @@ bool Game::attackPhase(Player* player) {
   std::vector<Creature*> attackers = iface.selectCards<Creature>("Select creatures to use in attack", availAttackers);
 
   // find creatures usable as blockers
-  Player* adversary = switchPlayer(player);
   auto availBlockers = adversary->getCardsInState<Creature>(Card::State::BATTLEFIELD);
   std::erase_if(availBlockers, [] (Card* c) { return c->isTapped(); });
 
@@ -183,7 +189,7 @@ bool Game::attackPhase(Player* player) {
   while(attackers.size() != 0 && availBlockers.size() != 0) {
 
     // choose an attacker
-    Creature* attacker = iface.selectCard(getPlayerName(adversary) + ", choose a card to block", attackers);
+    Creature* attacker = iface.selectCard(p2Name + ", choose a card to block", attackers);
     if(attacker == nullptr) {
       bool resp = iface.promptYesNo("Finished choosing blockers?");
       if(resp) break;
@@ -212,8 +218,35 @@ bool Game::attackPhase(Player* player) {
     }
   }
 
-  // TODO Perform the DUELS
+  // Perform the DUELS
+  for(auto& d : duels) {
+    Duel duel(d.first, d.second, player, adversary);
+    duel.performDuel();
+    
+    // Move dead blockers to Graveyard
+    std::vector<Creature*> deadBlockers = duel.blockers;
+    std::erase_if(deadBlockers, [] (Creature* blocker) {
+      return !(blocker->getToughness() == 0);
+    });
 
+    if(deadBlockers.size() > 0) {
+      std::string deadNames = deadBlockers[0]->getName();
+      for(auto it = ++deadBlockers.begin(); it != deadBlockers.end(); ++it) {
+        deadNames += ", " + (*it)->getName();
+      }
+
+      iface.tell(p2Name + " lost it's " + duel.attacker->getName() + " against " + p1Name +"'s attacker !");
+      for(auto blocker : deadBlockers)
+        blocker->setState(Card::State::GRAVEYARD);
+    }
+
+    // Move dead attacker to Graveyard
+    if(duel.attacker->getToughness() == 0) {
+      iface.tell(p1Name + " lost it's " + duel.attacker->getName() + " against " + p2Name +"'s blocker(s) !");
+      duel.attacker->setState(Card::State::GRAVEYARD);
+    }
+  }
+    
   return true;
 }
 
@@ -275,7 +308,7 @@ bool Game::playTurn(Player* player) {
 
   while(cont) {
 
-    int choice = iface.showMenu("What to do?", {
+    int choice = iface.showMenu(getPlayerName(player) + ", what to do?", {
       "Show...",
       MenuEntry("Place a Land", canPlaceLand ? NORMAL : DISABLED),
       "Place a Creature",
@@ -287,7 +320,7 @@ bool Game::playTurn(Player* player) {
       menuShowCards(player);
     }
     else if(choice == 1) { // place a land
-      canPlaceLand = placeLand(player);
+      canPlaceLand = !placeLand(player);
       canAttack = !hasAttacked && hasAttackCreatures();
     }
     else if(choice == 2) { // place cards
