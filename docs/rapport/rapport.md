@@ -4,7 +4,7 @@
 
 # 1. Présentation
 
-Pour ce projet, nous nous sommes concentré sur le développement de la *base* imposée par l'énoncé vu le peu de temps disponible.
+Pour ce projet, nous nous sommes concentrés sur le développement de la *base* imposée par l'énoncé vu le peu de temps disponible.
 Le jeu comporte une interface en console (*CLI*) réalisé avec la bibliothèque C "*ncurses*".
 
 ![Menu d'un tour de jeu](menu.png)
@@ -52,17 +52,22 @@ Le déroulement du jeu est bien guidé par la boîte de messages qui affiche les
 
 # 4. Fonctionnalités
 
-Le projet comporte uniquement la *base* avec en plus une jolie interface console.
+Le projet comporte la *base* avec en plus une jolie interface console.
 
-Nous prévoyons d'ajouter des abilités et éventuellement un serveur multijoueur suivant le temps et la motivation.
+Nous avons décidé d'utiliser système d'historique de "duels" pour représenter les combats. Un duel oppose un attaquant et aucun, un ou plusieurs défenseurs. 
+Les duels sont créés par étapes successives de choix des deux joueurs puis exécutés au cours de la partie. Cela permettra d'implémenter une sauvegarde de partie ou des interactions en ligne.
 
-Nous n'avons pas eu le temps de faire beaucoup de tests, il y a probablement quelques bugs.
+Nous prévoyons d'ajouter des abilités et éventuellement un serveur multijoueur suivant le temps et les difficultées rencontrées.
+
+Nous n'avons pas eu le temps de faire beaucoup de tests pour l'instant.
+
 
 # 5. Difficultés rencontrées
 
 Sur l'organisation, nous avons des visions différentes sur les principes OO tels que l'extensibilité et l'héritage, ce qui a rendu l'établissement de l'UML compliqué.
 
 Sur la modélisation, la difficulté principale du projet est de trouver un bon niveau de généricité de façon à pouvoir coder de nouvelles fonctionnalités sans tout refactoriser.
+
 En particulier la gestion des duels est compliquée, il est difficile de faire respecter toutes les *capacités* des cartes. Certaines capacités font l'objet d'exeptions dans le code comme Initiative.
 
 
