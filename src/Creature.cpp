@@ -1,8 +1,6 @@
 #include "Creature.hpp"
 
 
-Creature::~Creature() {}
-
 void Creature::attack(Creature* blocker) {
     int attackerToughness = this->getToughness();
     int attackerPower = this->getPower();

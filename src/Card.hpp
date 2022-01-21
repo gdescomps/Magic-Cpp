@@ -14,8 +14,9 @@ public:
 
   Card();
   virtual ~Card();
+  Card(Card const&) = delete;
+  Card& operator=(Card const&) = delete;
   
-  /** */
   State getState() const;
   void setState(State state);
   void tap();
