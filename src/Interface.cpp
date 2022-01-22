@@ -220,32 +220,11 @@ std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vecto
   return res;
 }
 
-template<>
-void Interface::drawCard(WINDOW* wrect, Land const* land) {
+void Interface::drawCardHeader(WINDOW* wrect, Card const* card) {
   int w = getmaxx(wrect);
  
-  // card header
-  wattron(wrect, A_BOLD);
-  hcwprintw(wrect, 0, land->getName().c_str());
-  wattroff(wrect, A_BOLD);
-  mvwhline(wrect, 1, 0, '-', w);
-  mvwprintw(wrect, 2, 1, land->getType().c_str());
-}
-
-template<>
-void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
-  int w = getmaxx(wrect);
-  int h = getmaxy(wrect);
-  
-  // card header
-  wattron(wrect, A_BOLD);
-  hcwprintw(wrect, 0, creature->getName().c_str());
-  wattroff(wrect, A_BOLD);
-  mvwhline(wrect, 1, 0, '-', w);
-  mvwprintw(wrect, 2, 1, creature->getType().c_str());
-
   // mana cost
-  auto cost = creature->getCost();
+  auto cost = card->getCost();
   int off = w;
   for(size_t i = 0; i < 5; i++) {
     Mana m = (Mana)i;
@@ -260,10 +239,33 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
     mvwaddch(wrect, 0, --off, cost.getAny() + '0'); 
   }
 
+  // card name, type, description
+  wattron(wrect, A_BOLD);
+  hcwprintw(wrect, 0, card->getName().c_str());
+  wattroff(wrect, A_BOLD);
+  mvwhline(wrect, 1, 0, '-', w);
+  mvwprintw(wrect, 2, 0, card->getType().c_str());
+  wattron(wrect, A_ITALIC);
+  writeText(wrect, 3, 0, card->getDesc(), w);
+  wattroff(wrect, A_ITALIC);
+}
+
+template<>
+void Interface::drawCard(WINDOW* wrect, Land const* land) {
+  drawCardHeader(wrect, land);
+}
+
+template<>
+void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
+  int w = getmaxx(wrect);
+  int h = getmaxy(wrect);
+  
+  drawCardHeader(wrect, creature);
+
   // power / toughness  
   mvwhline(wrect, h - 2, 0, '-', w);
   auto stats = std::to_string(creature->getPower()) + " / " + std::to_string(creature->getToughness());
-  mvwprintw(wrect, h - 1, w - stats.size() - 1, stats.c_str());
+  mvwprintw(wrect, h - 1, w - stats.size(), stats.c_str());
 }
 
 template<>
@@ -277,8 +279,9 @@ void Interface::drawCard(WINDOW* wrect, Card const* card) {
     drawCard(wrect, land);
   }
   else {
+    drawCardHeader(wrect, card);
     wattron(wrect, A_BOLD);
-    hcwprintw(wrect, 0, "Unknown Card");
+    hcwprintw(wrect, getmaxy(wrect) - 1, "Unknown Card");
     wattroff(wrect, A_BOLD);
   }
 }
@@ -321,6 +324,24 @@ bool Interface::promptYesNo(std::string const& msg) {
   std::string resp = prompt(msg + " (Y/n)");
   std::ranges::transform(resp, resp.begin(), [] (char c) { return std::tolower(c); });
   return (resp == "yes" || resp == "y" || resp == "");
+}
+
+void Interface::writeText(WINDOW* win, int y, int x, std::string msg, int maxW) {
+  while(msg.size()) {
+    std::string row = msg.substr(0, maxW);
+    msg = msg.substr(row.size(), msg.size());
+    if(msg.size() && !std::isspace(msg[0])) {
+      auto it = std::find_if(row.rbegin(), row.rend(), [] (char c) { return std::isspace(c); });
+      if(it != row.rend()) {
+        msg.insert(msg.begin(), it.base(), row.end());        
+        row.erase(it.base(), row.end());
+      }
+    }
+    msg.erase(msg.begin(), std::ranges::find_if(msg, [] (char c) { return !std::isspace(c); }));
+    wmove(win, y, x);
+    wprintw(win, row.c_str());
+    y++;
+  }
 }
 
 int Interface::getFgColor(Mana m) const {

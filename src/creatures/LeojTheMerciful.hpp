@@ -9,7 +9,7 @@ public:
   LeojTheMerciful(): Creature(5, 1) {}
   
   std::string getName() const override { return "Leoj The Merciful"; }
-  std::string getType() const override { return Creature::getType() + " - $5"; }
+  std::string getType() const override { return Creature::getType() + " - Grey Knight"; }
   std::string getDesc() const override { return "Don't be fooled by the name, it will destroy you in an instant."; }
   
   ManaCost getCost() const override {
@@ -23,4 +23,3 @@ public:
     return Mana::BLACK;
   }
 };
-

@@ -91,13 +91,17 @@ private:
   WINDOW* wheader;
   WINDOW* wprompt;
   WINDOW* wmain;
+
   void draw();
+  void writeText(WINDOW* win, int y, int x, std::string text, int maxW);
   
-  int cardW = 25;
-  int cardH = 15;
+  int cardW = 35;
+  int cardH = 20;
 
   template<class C>
   void drawCard(WINDOW* win, C const* card);
+  
+  void drawCardHeader(WINDOW* win, Card const* card);
   
   int getFgColor(Mana m) const;
   int getBgColor(Mana m) const;
@@ -194,7 +198,7 @@ inline void Interface::showCard(C const* card) {
   int cy = (getmaxy(wmain) - cardH) / 2;
   int cx = (getmaxx(wmain) - cardW) / 2;
   WINDOW* wout = derwin(wmain, cardH, cardW, cy, cx);
-  WINDOW* wrect = derwin(wout, cardH - 2, cardW - 2, 1, 1);
+  WINDOW* wrect = derwin(wout, cardH - 2, cardW - 4, 1, 2);
   
   int col = getFgColor(card->getMana());
   wattron(wout, COLOR_PAIR(col));
