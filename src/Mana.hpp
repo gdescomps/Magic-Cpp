@@ -37,7 +37,7 @@ public:
   }
   
   /** 
-   * Wether the mana matches the requirement.
+   * Wether the mana matches exactly the requirement.
    *  - each mana must be greater than or equal to the corresponding requirement
    *  - the remaining mana must match the 'any' requirement
    *  - the 'any' mana of this ManaCost is ignored  
@@ -49,6 +49,21 @@ public:
       remain += cost[i] - requirement.cost[i];
     }
     return remain == requirement.getAny();
+  }
+
+  /** 
+   * Wether the mana meet at least the requirement.
+   *  - each mana must be greater than or equal to the corresponding requirement
+   *  - the remaining mana must meet at least the 'any' requirement
+   *  - the 'any' mana of this ManaCost is ignored  
+   */
+  bool enough(ManaCost const& requirement) const {
+    int remain = 0;
+    for(size_t i = 0; i < cost.size(); i++) {
+      if(requirement.cost[i] > cost[i]) return false;
+      remain += cost[i] - requirement.cost[i];
+    }
+    return remain >= requirement.getAny();
   }
 
 private:

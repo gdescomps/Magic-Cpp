@@ -78,7 +78,7 @@ std::vector<C*> Player::getPlaceableCards(ManaCost const& cost) {
   auto cards = getCards<C>();
   
   std::erase_if(cards, [&] (Card* c) {
-    return c->getState() != Card::State::HAND || !cost.matches(c->getCost());
+    return c->getState() != Card::State::HAND || !cost.enough(c->getCost());
   });
 
   return cards;

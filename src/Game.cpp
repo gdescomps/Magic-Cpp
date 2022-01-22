@@ -169,43 +169,52 @@ bool Game::placeLand(Player* player) {
 }
 
 bool Game::placeCreature(Player* player) {
-  // find tappable lands
+  ManaCost avail;
+
+  // get available mana for the player
   auto lands = player->getCardsInState<Land>(Card::State::BATTLEFIELD);
   std::erase_if(lands, [] (Card* c) { return c->isTapped(); });
-
-  if(lands.size() == 0) {
-    iface.tell("No tappable land.");
-    return false;
+  for(auto land : lands) {
+    avail.add(land->getMana());
   }
 
-  ManaCost cost;
-
-  // ask lands to tap and build ManaCost
-  auto selectedLands = iface.selectCards("Tap lands?", lands);
-  for(Land* land : selectedLands) {
-    cost.add(land->getMana());
-  }
-
-  // find placeable cards (except lands)
-  auto placeables = player->getPlaceableCards<Card>(cost);
-  std::erase_if(placeables, [] (Card* c) {
-    return dynamic_cast<Land*>(c) != nullptr;
-  });
-
+  // find placeable creatures
+  auto placeables = player->getPlaceableCards<Creature>(avail);
   if(placeables.size() == 0) {
-    iface.tell("No card to place with the tapped mana.");
+    iface.tell("No placeable creature.");
     return false;
   }
 
-  // ask to place a card
-  auto selectedCards = iface.selectCards("Use cards?", placeables);
-  for(Card* card : selectedCards) {
-    card->tap();
-    card->setState(Card::State::BATTLEFIELD);
-    return true;
+  // ask creature to place
+  auto selected = iface.selectCard("Which creature do you wish to place?", placeables);
+  if(selected == nullptr) return false;
+  
+  // tap specific manas
+  ManaCost remain = selected->getCost();
+  for(auto it = lands.begin(); it != lands.end(); ) {
+    Land* land = *it;
+    if(remain.get(land->getMana()) > 0) {
+      land->tap();
+      remain.set(land->getMana(), remain.get(land->getMana()) - 1);
+      it = lands.erase(it);
+    }
+    ++it;
+  }
+  
+  // tab any mana
+  while(remain.getAny() > 0) {
+    auto selected = iface.selectCards("Select lands to tap (" + std::to_string(remain.getAny()) + " missing)", lands);
+    for(auto land : selected) {
+      land->tap();
+      remain.setAny(remain.getAny() - 1);
+      lands.erase(std::ranges::find(lands, land));
+    }
   }
 
-  return false;
+  // place the creature
+  selected->tap();
+  selected->setState(Card::State::BATTLEFIELD);
+  return true;
 }
 
 bool Game::attackPhase(Player* player) {
@@ -225,6 +234,7 @@ bool Game::attackPhase(Player* player) {
 
   // ask creatures to use
   std::vector<Creature*> attackers = iface.selectCards<Creature>("Select creatures to use in attack", availAttackers);
+  if(attackers.size() == 0) return false;
 
   // find creatures usable as blockers
   auto availBlockers = adversary->getCardsInState<Creature>(Card::State::BATTLEFIELD);
