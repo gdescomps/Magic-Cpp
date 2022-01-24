@@ -18,6 +18,9 @@
 #include "creatures/SerraAngel.hpp"
 #include "creatures/Theresa.hpp"
 
+#include "abilities/Haste.hpp"
+#include "abilities/Vigilance.hpp"
+
 void shuffleDeck(Cards& deck) {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -205,7 +208,7 @@ bool Game::placeCreature(Player* player) {
   while(remain.getAny() > 0) {
     auto selected = iface.selectCards("Select lands to tap (" + std::to_string(remain.getAny()) + " missing).", lands);
 
-    if(selected.size() > remain.getAny()) {
+    if((int)selected.size() > remain.getAny()) {
       iface.tell("Too many lands tapped.");
       continue;
     }
@@ -218,7 +221,8 @@ bool Game::placeCreature(Player* player) {
   }
 
   // place the creature
-  selected->tap(); // mal d'invocation
+  if(!selected->hasAbility(Haste::getInst()))
+    selected->tap();
   selected->setState(Card::State::BATTLEFIELD);
   return true;
 }
@@ -296,6 +300,9 @@ bool Game::attackPhase(Player* player) {
   // Perform the DUELS
   for(auto& duel : duels) {
     duel.performDuel();
+    
+    if(duel.attacker->hasAbility(Vigilance::getInst()))
+      duel.attacker->tap();
     
     // reset cards stats
     duel.attacker->setPower(duel.attacker->getBasePower());

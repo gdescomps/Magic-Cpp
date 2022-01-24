@@ -14,7 +14,7 @@ public:
   }
   
   std::string getDesc() const override {
-    return "cannot be blocked by a single creature";
+    return "cannot be blocked by a single creature.";
   }
   
   static Menace* getInst() {

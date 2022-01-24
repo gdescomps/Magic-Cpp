@@ -1,6 +1,5 @@
 #include "Creature.hpp"
 #include "Ability.hpp"
-#include "abilities/DefaultAbility.hpp"
 
 #include <algorithm>
 
@@ -9,7 +8,7 @@ Creature::Creature(int power, int toughness, std::vector<Ability*> abilities)
 {}
 
 Creature::Creature(int power, int toughness)
-  : Creature(power, toughness, { DefaultAbility::getInst() })
+  : Creature(power, toughness, {})
 {}
 
 void Creature::attack(Creature* blocker) {

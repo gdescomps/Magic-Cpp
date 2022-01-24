@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "Creature.hpp"
+#include "Ability.hpp"
 
 void hcwprintw(WINDOW* win, int y, std::string txt) {
   int x = (getmaxx(win) - txt.size()) / 2;
@@ -220,7 +221,7 @@ std::vector<bool> Interface::showMenuMultiple(std::string const& msg, std::vecto
   return res;
 }
 
-void Interface::drawCardHeader(WINDOW* wrect, Card const* card) {
+int Interface::drawCardHeader(WINDOW* wrect, Card const* card) {
   int w = getmaxx(wrect);
  
   // mana cost
@@ -246,8 +247,9 @@ void Interface::drawCardHeader(WINDOW* wrect, Card const* card) {
   mvwhline(wrect, 1, 0, '-', w);
   mvwprintw(wrect, 2, 0, card->getType().c_str());
   wattron(wrect, A_ITALIC);
-  writeText(wrect, 3, 0, card->getDesc(), w);
+  int count = writeText(wrect, 3, 0, card->getDesc(), w);
   wattroff(wrect, A_ITALIC);
+  return count + 3;
 }
 
 template<>
@@ -260,7 +262,17 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
   int w = getmaxx(wrect);
   int h = getmaxy(wrect);
   
-  drawCardHeader(wrect, creature);
+  int off = 1 + drawCardHeader(wrect, creature);
+  
+  // abilities
+  for(auto ability : creature->getAbilities()) {
+    auto name = ability->getName() + ": ";
+    auto desc = ability->getDesc();
+    wattron(wrect, A_BOLD);
+    mvwprintw(wrect, off, 0, name.c_str());
+    wattroff(wrect, A_BOLD);
+    off += writeText(wrect, off, name.size(), desc.c_str(), w);
+  }
 
   // power / toughness  
   mvwhline(wrect, h - 2, 0, '-', w);
@@ -326,7 +338,8 @@ bool Interface::promptYesNo(std::string const& msg) {
   return (resp == "yes" || resp == "y" || resp == "");
 }
 
-void Interface::writeText(WINDOW* win, int y, int x, std::string msg, int maxW) {
+int Interface::writeText(WINDOW* win, int y, int x, std::string msg, int maxW) {
+  int i = 0;
   while(msg.size()) {
     std::string row = msg.substr(0, maxW);
     msg = msg.substr(row.size(), msg.size());
@@ -341,7 +354,9 @@ void Interface::writeText(WINDOW* win, int y, int x, std::string msg, int maxW) 
     wmove(win, y, x);
     wprintw(win, row.c_str());
     y++;
+    i++;
   }
+  return i;
 }
 
 int Interface::getFgColor(Mana m) const {

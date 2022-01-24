@@ -1,14 +1,13 @@
 #pragma once
 
 #include "../Creature.hpp"
-#include "../abilities/DefaultAbility.hpp"
 #include "../abilities/Menace.hpp"
 
 class SerraAngel : public Creature {
 
 public:
 
-  SerraAngel(): Creature(4, 4, make_abilities<DefaultAbility, Menace>()) 
+  SerraAngel(): Creature(4, 4, make_abilities<Menace>()) 
   {}
 
   std::string getName() const override { return "Serra Angel"; }

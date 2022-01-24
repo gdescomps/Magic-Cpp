@@ -93,7 +93,7 @@ private:
   WINDOW* wmain;
 
   void draw();
-  void writeText(WINDOW* win, int y, int x, std::string text, int maxW);
+  int writeText(WINDOW* win, int y, int x, std::string text, int maxW);
   
   int cardW = 35;
   int cardH = 20;
@@ -101,7 +101,7 @@ private:
   template<class C>
   void drawCard(WINDOW* win, C const* card);
   
-  void drawCardHeader(WINDOW* win, Card const* card);
+  int drawCardHeader(WINDOW* win, Card const* card);
   
   int getFgColor(Mana m) const;
   int getBgColor(Mana m) const;
