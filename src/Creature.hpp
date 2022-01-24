@@ -3,18 +3,20 @@
 #include <string>
 
 #include "Card.hpp"
-
 #include "Duel.hpp"
+
+class Ability;
 
 class Creature : public Card {
 
 private:
     int power, basePower;
     int toughness, baseToughness;
+    std::vector<Ability*> abilities;
 
 public:
-    Creature(int power, int toughness) 
-        : power(power), basePower(power), toughness(toughness), baseToughness(toughness) {}
+    Creature(int power, int toughness, std::vector<Ability*> abilities);
+    Creature(int power, int toughness);
 
     virtual std::string getName() const override = 0;
     virtual std::string getType() const override { return "Creature"; }
@@ -27,6 +29,12 @@ public:
     int getToughness() const { return this->toughness; }
     void setToughness(int t) { this->toughness = t; }
 
-    virtual void attack(Creature* adversary);
+    void attack(Creature* adversary);
+    DuelValidation validateAttack(Duel const& duel);
+    DuelValidation validateBlock(Duel const& duel);
 
+    std::vector<Ability*> getAbilities() const { return this->abilities; }
+    bool hasAbility(Ability* ability) const;
+    
+    bool isFirstTurn() const { return false; /* TODO */ }
 };

@@ -198,12 +198,18 @@ bool Game::placeCreature(Player* player) {
       remain.set(land->getMana(), remain.get(land->getMana()) - 1);
       it = lands.erase(it);
     }
-    ++it;
+    else ++it;
   }
   
   // tab any mana
   while(remain.getAny() > 0) {
-    auto selected = iface.selectCards("Select lands to tap (" + std::to_string(remain.getAny()) + " missing)", lands);
+    auto selected = iface.selectCards("Select lands to tap (" + std::to_string(remain.getAny()) + " missing).", lands);
+
+    if(selected.size() > remain.getAny()) {
+      iface.tell("Too many lands tapped.");
+      continue;
+    }
+
     for(auto land : selected) {
       land->tap();
       remain.setAny(remain.getAny() - 1);
@@ -212,7 +218,7 @@ bool Game::placeCreature(Player* player) {
   }
 
   // place the creature
-  selected->tap();
+  selected->tap(); // mal d'invocation
   selected->setState(Card::State::BATTLEFIELD);
   return true;
 }
@@ -221,7 +227,7 @@ bool Game::attackPhase(Player* player) {
   Player* adversary = switchPlayer(player);
   auto p1Name = getPlayerName(player);
   auto p2Name = getPlayerName(adversary);
-  std::vector<std::pair<Creature*, std::vector<Creature*>>> duels;
+  std::vector<Duel> duels;
 
   // find creatures usable in attack
   auto availAttackers = player->getCardsInState<Creature>(Card::State::BATTLEFIELD);
@@ -253,9 +259,17 @@ bool Game::attackPhase(Player* player) {
 
     // choose blockers
     auto blockers = iface.selectCards("Choose cards to block this attacker", availBlockers);
-
+    
+    // verify duel
+    Duel duel(attacker, blockers, player, adversary);
+    auto validation = duel.validateDuel();
+    if(!validation) {
+      iface.tell("The duel was refused because " + validation.getMsg());
+      continue;
+    }
+    
     // create the duel and remove attacker / blockers
-    duels.emplace_back(attacker, blockers);
+    duels.push_back(duel);
     if(blockers.size() != 0) {
       attackers.erase(std::ranges::find(attackers, attacker));
       for(auto blocker : blockers) {
@@ -264,30 +278,29 @@ bool Game::attackPhase(Player* player) {
     }
 
     // ask player to order attacks for duels with multiple blockers
-    for(auto& duel : duels) if(duel.second.size() >= 2) {
-      for(size_t i = 0; i < duel.second.size() - 1; i++) {
+    for(auto& duel : duels) if(duel.blockers.size() >= 2) {
+      for(size_t i = 0; i < duel.blockers.size() - 1; i++) {
         Card* card;
-        do card = iface.selectCard("Choose the " + getOrdinal(i) + " card to attack with your " + duel.first->getName(), duel.second);
+        do card = iface.selectCard("Choose the " + getOrdinal(i) + " card to attack with your " + duel.attacker->getName(), duel.blockers);
         while(card == nullptr);
-        std::iter_swap(duel.second.begin() + i, std::ranges::find(duel.second, card));
+        std::iter_swap(duel.blockers.begin() + i, std::ranges::find(duel.blockers, card));
       }
     }
   }
   
   // add remaining attackers
   for(Creature* attacker : attackers) {
-    duels.emplace_back(attacker, std::vector<Creature*>{});
+    duels.emplace_back(attacker, std::vector<Creature*>{}, player, adversary);
   }
 
   // Perform the DUELS
-  for(auto& d : duels) {
-    Duel duel(d.first, d.second, player, adversary);
+  for(auto& duel : duels) {
     duel.performDuel();
     
     // reset cards stats
-    d.first->setPower(d.first->getBasePower());
-    d.first->setToughness(d.first->getBaseToughness());
-    for(Creature* blocker : d.second) {
+    duel.attacker->setPower(duel.attacker->getBasePower());
+    duel.attacker->setToughness(duel.attacker->getBaseToughness());
+    for(Creature* blocker : duel.blockers) {
       blocker->setPower(blocker->getBasePower());
       blocker->setToughness(blocker->getBaseToughness());
     }

@@ -2,8 +2,6 @@
 
 #include "Mana.hpp"
 
-class Ability;
-
 /** A card. (abstract class) */
 class Card {
 
@@ -22,14 +20,12 @@ public:
   void tap();
   void untap();
   bool isTapped() const;
-  bool hasAbility(Ability const* ability) const;
   
   virtual std::string getName() const = 0;
   virtual std::string getType() const = 0;
   virtual std::string getDesc() const { return "No description available."; }
   virtual ManaCost getCost() const = 0;
   virtual Mana getMana() const = 0;
-  virtual std::vector<Ability const*> getAbilities() const { return {}; }
 private:
   State state;
   bool tapped;
