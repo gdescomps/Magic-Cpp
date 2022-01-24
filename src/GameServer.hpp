@@ -2,6 +2,7 @@
 
 #include "Card.hpp"
 #include "Game.hpp"
+#include "Duel.hpp"
 
 class GameServer {
 
@@ -10,10 +11,11 @@ public:
     virtual ~GameServer();
 
 private:
-    Cards deckP1, deckP2;
+    std::vector<Card*> deckP1, deckP2;
 
     void start();
     
+    std::vector<Duel> duelHistory;
 
 };
 

@@ -13,6 +13,8 @@ public:
   Player* player;
   Player* adversary;
 
+  Duel(){}
+
   Duel(Creature* attacker, std::vector<Creature*> blockers, Player* player, Player* adversary)
     : attacker(attacker), blockers(blockers), player(player), adversary(adversary)
   {}

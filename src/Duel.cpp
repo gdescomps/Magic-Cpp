@@ -17,5 +17,5 @@ void Duel::performDuel() {
     }
     
     // deal excess damage to the adversary
-    adversary->setHP(std::max(0, adversary->getHP() - attacker->getPower()));
+    // adversary->setHP(std::max(0, adversary->getHP() - attacker->getPower()));
   }
