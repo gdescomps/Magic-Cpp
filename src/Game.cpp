@@ -346,6 +346,7 @@ void Game::menuShowCards(Player* player) {
     "Show your hand",
     "Show your battlefield",
     "Show adversary battlefield",
+    "Show your graveyard",
     "Go back",
   });
   
@@ -384,6 +385,16 @@ void Game::menuShowCards(Player* player) {
       iface.showCards(msg, cards);
     else
       iface.tell("Battlefield is empty");
+  }
+
+  else if(choice == 4) { // show graveyard
+    auto msg = getPlayerName(player) + "'s cards in graveyard";
+    auto cards = player->getCardsInState<Card>(Card::State::GRAVEYARD);
+
+    if(cards.size() > 0)
+      iface.showCards(msg, cards);
+    else
+      iface.tell("Graveyard is empty");
   }
 }
 
