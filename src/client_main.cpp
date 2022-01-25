@@ -14,7 +14,7 @@
 
 int main(void) {
   Client c;
-
-
+  
+  c.poll();
   return 0;
 }

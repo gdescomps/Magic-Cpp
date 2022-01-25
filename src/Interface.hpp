@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
 #include "Card.hpp"
 #include "Creature.hpp"
@@ -45,10 +46,10 @@ public:
   Interface(GameServer* s) : server(s) {};
   ~Interface(){};
   
-//   /** Show a card details centered on the screen.
-//       Note: call hideAll() to hide */  
-//   template<class C>
-//   void showCard(C const* c);
+  /** Show a card details centered on the screen.
+      Note: call hideAll() to hide */  
+  template<class C>
+  void showCard(C const* c);
   
 //   /** Show cards details centered on the screen.
 //       Note: call hideAll() to hide */
@@ -89,3 +90,12 @@ public:
 private:
   GameServer* server;
 };
+
+
+template <class C>
+inline void Interface::showCard(C const *card)
+{
+  // int cardI = std::find(server->deckP1.begin(), server->deckP1.end(), card); 
+  
+  std::cout << card->getName() << " i:" << std::endl;
+}

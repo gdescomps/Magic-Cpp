@@ -2,7 +2,7 @@
 
 #include "GameServer.hpp"
 // #include "Interface.hpp"
-
+#include "creatures/AirBender.hpp"
 
 int main()
 {
@@ -20,6 +20,10 @@ int main()
       MenuEntry("Attack", MenuEntry::State::NORMAL),
       "Finish turn",
     });
+
+    // AirBender c;
+
+    // iface.showCard(&c);
 
     s.start();
 

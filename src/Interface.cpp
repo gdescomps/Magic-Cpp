@@ -6,41 +6,46 @@
 
 #include "GameServer.hpp"
 
-void Interface::tell(std::string const& msg) {
-    std::cout << msg << std::endl;
+using namespace rapidjson;
+using namespace std;
+
+void Interface::tell(std::string const &msg)
+{
+  std::cout << msg << std::endl;
 }
 
-int Interface::showMenu(std::string const& msg, std::vector<MenuEntry> choices){
-    using namespace rapidjson;
-    using namespace std;
+int Interface::showMenu(std::string const &msg, std::vector<MenuEntry> choices)
+{
 
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
 
-    StringBuffer s;
-    Writer<StringBuffer> writer(s);
-    
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("menu");
+  writer.Key("msg");
+  writer.String(msg.c_str());
+  writer.Key("entries");
+  writer.StartArray();
+
+  for (auto e : choices)
+  {
     writer.StartObject();
-    writer.Key("dataType");
-    writer.String("menu");
-    writer.Key("msg");
-    writer.String(msg.c_str());
-    writer.Key("entries");
-    writer.StartArray();
-    
-    for(auto e : choices) {
-        writer.StartObject();
-        writer.Key("state");
-        writer.Int(static_cast<int>(e.state));
-        writer.Key("text");
-        writer.String(e.text.c_str());
-        writer.EndObject(); 
-    }
-           
-    writer.EndArray();
+    writer.Key("state");
+    writer.Int(static_cast<int>(e.state));
+    writer.Key("text");
+    writer.String(e.text.c_str());
     writer.EndObject();
+  }
 
-    // cout << s.GetString() << endl;
+  writer.EndArray();
+  writer.EndObject();
 
-    this->server->send(s.GetString());
+  // cout << s.GetString() << endl;
 
-    return 1;
+  this->server->send(s.GetString());
+
+  return 1;
 }
+
+
