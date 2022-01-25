@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Creature.hpp"
+#include "../CardRegistry.hpp"
 
 class SerraAngel : public Creature {
 
@@ -21,5 +22,10 @@ public:
 
   Mana getMana() const override {
     return Mana::WHITE;
+  }
+  
+  int getCardId() const override {
+    static int id = CardRegistry::getInst().registerCard<SerraAngel>();
+    return id;
   }
 };

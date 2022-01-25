@@ -8,7 +8,8 @@ src/Creature.cpp \
 src/Interface.cpp \
 src/Player.cpp \
 src/Duel.cpp \
-src/Game.cpp
+src/Game.cpp \
+src/Land.cpp
 
 SERVER_SRCS = \
 src/Card.cpp \
@@ -17,13 +18,15 @@ src/GameServer.cpp \
 src/Duel.cpp \
 src/Player.cpp \
 src/Interface.cpp \
-src/UserInterface.cpp 
+src/UserInterface.cpp \
+src/Land.cpp 
 
 CLIENT_SRCS = \
 src/Card.cpp \
 src/Creature.cpp \
 src/UserInterface.cpp \
-src/Client.cpp
+src/Client.cpp \
+src/Land.cpp
 
 
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))

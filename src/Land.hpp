@@ -9,26 +9,15 @@
 class Land : public Card {
 
 public:
-  Land(Mana mana) : mana(mana) {} 
+  Land(Mana mana);
+  Land();
 
-  Mana getMana() const override { return mana; }
-  
-  std::string getName() const override { 
-    static std::array<std::string, 5> const names = {
-      "Plains", "Island", "Swamp", "Mountain", "Forest"
-    };
+  Mana getMana() const override;  
+  std::string getName() const override;  
+  std::string getType() const override;  
+  ManaCost getCost() const override;
+  int getCardId() const override;
 
-    return names[(size_t)mana]; // using enum indexing order in the lookup of names
-  }
-  
-  std::string getType() const override {
-    static std::array<std::string, 5> const names = {
-      "White", "Blue", "Black", "Red", "Forest"
-    };
-    return "Land - " + names[(size_t)mana] + " mana"; // using enum indexing order in the lookup of names
-  }
-  
-  ManaCost getCost() const override { return ManaCost(); }
 private:
   Mana mana;
 };

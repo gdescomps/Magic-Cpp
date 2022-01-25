@@ -30,6 +30,7 @@ public:
   virtual ManaCost getCost() const = 0;
   virtual Mana getMana() const = 0;
   virtual std::vector<Ability const*> getAbilities() const { return {}; }
+  virtual int getCardId() const = 0;
 private:
   State state;
   bool tapped;
