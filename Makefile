@@ -1,5 +1,5 @@
 CC=clang++
-CFLAGS=-Wall -Wextra -std=c++20 -g -fPIC
+CFLAGS=-Wall -Wextra -std=c++20 -g -fPIC -Ilib
 LDFLAGS=-lncurses
 
 SRCS=\
