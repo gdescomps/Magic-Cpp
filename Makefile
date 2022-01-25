@@ -16,7 +16,8 @@ src/Creature.cpp \
 src/GameServer.cpp \
 src/Duel.cpp \
 src/Player.cpp \
-src/Interface.cpp
+src/Interface.cpp \
+src/UserInterface.cpp
 
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 

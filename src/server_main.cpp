@@ -8,17 +8,17 @@ int main()
 {
     auto s = GameServer();
         
-    Interface i(&s);
+    Interface iface(&s);
     // i.tell("test message");
 
     // std::cout << MenuEntry("Test choice", MenuEntry::State::NORMAL).toString() << std::endl;
 
-    i.showMenu("What to show?", {
-        "Show HP",
-        "Show your hand",
-        "Show your battlefield",
-        "Show adversary battlefield",
-        "Go back",
+    iface.showMenu("What to do?", {
+      "Show...",
+      MenuEntry("Place a Land", MenuEntry::State::DISABLED),
+      "Place a Creature",
+      MenuEntry("Attack", MenuEntry::State::NORMAL),
+      "Finish turn",
     });
 
     s.start();
