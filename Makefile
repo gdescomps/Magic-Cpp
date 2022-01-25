@@ -17,11 +17,20 @@ src/GameServer.cpp \
 src/Duel.cpp \
 src/Player.cpp \
 src/Interface.cpp \
-src/UserInterface.cpp
+src/UserInterface.cpp 
+
+CLIENT_SRCS = \
+src/Card.cpp \
+src/Creature.cpp \
+src/UserInterface.cpp \
+src/Client.cpp
+
 
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 
 SERVER_OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SERVER_SRCS)))
+
+CLIENT_OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(CLIENT_SRCS)))
 
 .PHONY: clean
 
@@ -38,6 +47,10 @@ server: $(SERVER_OBJS) src/server_main.cpp
 
 server_test: $(SERVER_OBJS) src/server_test.cpp
 	$(CC) $(CFLAGS) $(SERVER_OBJS) src/server_test.cpp -o bin/server_test $(LDFLAGS) 
+
+client: $(CLIENT_OBJS) src/client_main.cpp
+	$(CC) $(CFLAGS) $(CLIENT_OBJS) src/client_main.cpp -o bin/client $(LDFLAGS) 
+
 
 clean:
 	rm -f bin/*.o
