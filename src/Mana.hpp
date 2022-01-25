@@ -6,6 +6,13 @@
 
 enum class Mana { WHITE, BLUE, BLACK, RED, GREEN };
 
+inline std::string manaToString(Mana m) {
+  constexpr std::array lookup = {
+    "White", "Blue", "Black", "Red", "Green"
+  };
+  return lookup[(size_t)m];
+}
+
 class ManaCost {
 public:
   ManaCost(): anyCost(0) {

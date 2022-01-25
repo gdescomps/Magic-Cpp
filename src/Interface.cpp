@@ -252,9 +252,19 @@ int Interface::drawCardHeader(WINDOW* wrect, Card const* card) {
   return count + 3;
 }
 
+void Interface::drawCardFooter(WINDOW* wrect, Card const* card) {
+  int w = getmaxx(wrect);
+  int h = getmaxy(wrect);
+
+  mvwhline(wrect, h - 2, 0, '-', w);
+  auto s = Card::stateToString(card->getState()) + (card->isTapped() ? " (tapped)" : "");
+  mvwprintw(wrect, h - 1, 0, s.c_str());
+}
+
 template<>
 void Interface::drawCard(WINDOW* wrect, Land const* land) {
   drawCardHeader(wrect, land);
+  drawCardFooter(wrect, land);
 }
 
 template<>
@@ -274,14 +284,14 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
     off += writeText(wrect, off, name.size(), desc.c_str(), w);
   }
 
-  // power / toughness  
-  mvwhline(wrect, h - 2, 0, '-', w);
+  // power / toughness
+  drawCardFooter(wrect, creature);
   auto stats = std::to_string(creature->getPower()) + " / " + std::to_string(creature->getToughness());
   mvwprintw(wrect, h - 1, w - stats.size(), stats.c_str());
 }
 
 template<>
-void Interface::drawCard(WINDOW* wrect, Card const* card) {  
+void Interface::drawCard(WINDOW* wrect, Card const* card) {
   if(dynamic_cast<Creature const*>(card)) { 
     auto creature = dynamic_cast<Creature const*>(card);
     drawCard(wrect, creature);
@@ -295,6 +305,7 @@ void Interface::drawCard(WINDOW* wrect, Card const* card) {
     wattron(wrect, A_BOLD);
     hcwprintw(wrect, getmaxy(wrect) - 1, "Unknown Card");
     wattroff(wrect, A_BOLD);
+    drawCardFooter(wrect, card);
   }
 }
 

@@ -9,9 +9,11 @@ public:
   enum class State {
     LIBRARY, HAND, GRAVEYARD, BATTLEFIELD
   };
+  
+  static std::string stateToString(State s);
 
   Card();
-  virtual ~Card();
+  virtual ~Card() = default;
   Card(Card const&) = delete;
   Card& operator=(Card const&) = delete;
   

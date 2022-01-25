@@ -22,23 +22,15 @@ public:
   }
   
   std::string getName() const override {
-    return colorToString() + " Immunity";
+    return manaToString(M) + " Immunity";
   }
   
   std::string getDesc() const override {
-    return "Cannot be attacked or inflict damage to " + colorToString() + " creatures.";
+    return "Cannot be attacked or inflict damage to " + manaToString(M) + " creatures.";
   }
   
   static ColorImmunity<M>* getInst() {
     static ColorImmunity<M> inst;
     return &inst;
-  }
-  
-private:
-  std::string colorToString() {
-    static std::vector<std::string> lookup = {
-      "White", "Blue", "Black", "Red", "Green"
-    };
-    return lookup[(size_t)M];
   }
 };

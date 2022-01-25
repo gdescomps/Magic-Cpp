@@ -5,11 +5,14 @@
 
 Card::Card()
   : state(State::LIBRARY)
-{
+{}
 
+std::string Card::stateToString(State s) {
+  constexpr std::array lookup = {
+    "Library", "Hand", "Graveyard", "Battlefield"
+  };
+  return lookup[(size_t)s];
 }
-
-Card::~Card() {}
 
 void Card::setState(State state) {
   this->state = state;

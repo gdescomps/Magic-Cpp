@@ -102,6 +102,7 @@ private:
   void drawCard(WINDOW* win, C const* card);
   
   int drawCardHeader(WINDOW* win, Card const* card);
+  void drawCardFooter(WINDOW* win, Card const* card);
   
   int getFgColor(Mana m) const;
   int getBgColor(Mana m) const;

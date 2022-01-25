@@ -127,9 +127,9 @@ void Game::play() {
     player = switchPlayer(player);
     iface.tell(getPlayerName(player) + " starts playing.");
   }
-
-  player = switchPlayer(player);
-  iface.tell("Game has ended, " + getPlayerName(player) + " wins.");
+  
+  Player* winner = player1.getHP() == 0 ? &player2 : &player1;
+  iface.tell("Game has ended, " + getPlayerName(winner) + " wins.");
 }
 
 bool Game::drawPhase(Player* player) {
@@ -285,7 +285,8 @@ bool Game::attackPhase(Player* player) {
     for(auto& duel : duels) if(duel.blockers.size() >= 2) {
       for(size_t i = 0; i < duel.blockers.size() - 1; i++) {
         Card* card;
-        do card = iface.selectCard("Choose the " + getOrdinal(i) + " card to attack with your " + duel.attacker->getName(), duel.blockers);
+        std::vector<Creature*> remainingBlockers(duel.blockers.begin() + i, duel.blockers.end());
+        do card = iface.selectCard("Choose the " + getOrdinal(i+1) + " card to attack with your " + duel.attacker->getName(), remainingBlockers);
         while(card == nullptr);
         std::iter_swap(duel.blockers.begin() + i, std::ranges::find(duel.blockers, card));
       }
@@ -404,7 +405,6 @@ bool Game::playTurn(Player* player) {
   bool canAttack = hasAttackCreatures();
 
   while(cont) {
-
     int choice = iface.showMenu(getPlayerName(player) + ", what to do?", {
       "Show...",
       MenuEntry("Place a Land", canPlaceLand ? NORMAL : DISABLED),
@@ -431,6 +431,9 @@ bool Game::playTurn(Player* player) {
     else if(choice == 4) { // finish turn
       return cont;
     }
+    
+    // stop if a player is dead
+    cont = player1.getHP() != 0 && player2.getHP() != 0;
   }
 
   return cont;
