@@ -11,17 +11,6 @@ Creature::Creature(int power, int toughness)
   : Creature(power, toughness, {})
 {}
 
-void Creature::attack(Creature* blocker) {
-  int attackerToughness = this->getToughness();
-  int attackerPower = this->getPower();
-  int blockerToughness = blocker->getToughness();
-  int blockerPower = blocker->getPower();
-  
-  // perform the attack simultaneously on the attacker & blocker
-  this->setToughness(std::max(0, attackerToughness - blockerPower));
-  blocker->setToughness(std::max(0, blockerToughness - attackerPower));
-}
-
 DuelValidation Creature::validateAttack(Duel const& duel) {
   auto err = std::find_if(abilities.begin(), abilities.end(), [&] (Ability* ability) { return !ability->validateAttack(duel); });
   if(err == abilities.end()) return DuelValidation::ok(); 

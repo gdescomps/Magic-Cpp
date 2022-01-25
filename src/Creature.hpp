@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <algorithm>
 
 #include "Card.hpp"
 #include "Duel.hpp"
@@ -29,12 +30,21 @@ public:
     int getToughness() const { return this->toughness; }
     void setToughness(int t) { this->toughness = t; }
 
-    void attack(Creature* adversary);
     DuelValidation validateAttack(Duel const& duel);
     DuelValidation validateBlock(Duel const& duel);
 
     std::vector<Ability*> getAbilities() const { return this->abilities; }
     bool hasAbility(Ability* ability) const;
+    template<class A>
+    bool hasAbility() const;
     
     bool isFirstTurn() const { return false; /* TODO */ }
 };
+
+template<class A>
+inline bool Creature::hasAbility() const {
+  auto it = std::ranges::find_if(abilities, [] (Ability* a) {
+      return dynamic_cast<A>(a) != nullptr;
+  });
+  return it != abilities.end();
+}

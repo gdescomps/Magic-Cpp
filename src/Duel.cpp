@@ -15,22 +15,42 @@ DuelValidation Duel::validateDuel() {
   return DuelValidation::ok();
 }
 
+void Duel::performAttack(Creature* attacker, Creature* blocker) {
+  int attackerToughness = attacker->getToughness();
+  int attackerPower = attacker->getPower();
+  int blockerToughness = blocker->getToughness();
+  int blockerPower = blocker->getPower();
+  
+  // perform the attack simultaneously on the attacker & blocker
+  attacker->setToughness(std::max(0, attackerToughness - blockerPower));
+  attacker->setPower(std::max(0, attackerPower - blockerToughness));
+  blocker->setToughness(std::max(0, blockerToughness - attackerPower));
+  blocker->setPower(std::max(0, blockerPower - attackerToughness));
+}
+
 void Duel::performDuel() {
+  // pre duel hooks
+  for(auto a : attacker->getAbilities()) a->usePreDuel(*this, attacker);
+  for(auto b : blockers) for(auto a : b->getAbilities()) a->usePreDuel(*this, b);
+
   for(Creature* blocker : blockers) {
-    int attackerToughness = attacker->getToughness();
-    int attackerPower = attacker->getPower();
-    int blockerToughness = blocker->getToughness();
-    int blockerPower = blocker->getPower();
-    
-    // perform the attack simultaneously on the attacker & blocker
-    attacker->setToughness(std::max(0, attackerToughness - blockerPower));
-    attacker->setPower(std::max(0, attackerPower - blockerToughness));
-    blocker->setToughness(std::max(0, blockerToughness - attackerPower));
-    blocker->setPower(std::max(0, blockerPower - attackerToughness));
+    // pre attack hooks
+    for(auto a : attacker->getAbilities()) a->usePreAttack(*this);
+    for(auto a : blocker->getAbilities()) a->usePreBlock(*this, blocker);
+
+    performAttack(attacker, blocker);
+
+    // post attack hooks
+    for(auto a : attacker->getAbilities()) a->usePostAttack(*this);
+    for(auto a : blocker->getAbilities()) a->usePostBlock(*this, blocker);
   }
   
   // deal excess damage to the adversary
   adversary->setHP(std::max(0, adversary->getHP() - attacker->getPower()));
+  
+  // post duel hooks
+  for(auto a : attacker->getAbilities()) a->usePostDuel(*this, attacker);
+  for(auto b : blockers) for(auto a : b->getAbilities()) a->usePreDuel(*this, b);
 }
 
 DuelValidation::operator bool() { return isOk; }

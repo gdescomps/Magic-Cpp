@@ -36,5 +36,8 @@ public:
   
   DuelValidation validateDuel();
   void performDuel();
+  
+private:
+  void performAttack(Creature* attacker, Creature* blocker);
 };
 
