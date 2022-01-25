@@ -10,12 +10,16 @@ public:
     GameServer();
     virtual ~GameServer();
 
-private:
-    std::vector<Card*> deckP1, deckP2;
+    void send(std::string s);
 
     void start();
+
+private:
+    std::vector<Card*> deckP1, deckP2;
     
     std::vector<Duel> duelHistory;
+    std::vector<std::string> sendBuffer;
 
+    int currentPlayer;
 };
 

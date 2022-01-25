@@ -1,4 +1,4 @@
-#include "httplib.hpp"
+#include "../lib/httplib.hpp"
 #include <iostream>
 #include <sys/types.h>
 #include <unistd.h>
@@ -84,14 +84,18 @@ GameServer::GameServer() {
     }
 
     this->deckP1 = res;
-    // for(auto c : this->deckP1){
-    //     std::cout << c->getName() << '\n';
-    // }
 
-    this->start();
+    this->sendBuffer = {"void", "void"};
+    this->currentPlayer = 0;
+
 }
 
 GameServer::~GameServer(){}
+
+void GameServer::send(std::string s){
+    this->sendBuffer[this->currentPlayer] = s;
+    // std::cout << s << std::endl;
+}
 
 void GameServer::start(){
     Server svr;
@@ -160,6 +164,17 @@ void GameServer::start(){
         std::cout << result << std::endl;
         
         res.set_content(result, "text/plain");
+    });
+
+    svr.Get(R"(/poll/(\d+))", [&](const Request &req, Response &res) {
+        
+        int playerI = std::stoi(req.matches[1]);
+
+        // std::cout << req.body.data() << std::endl;
+
+        std::cout << this->sendBuffer[playerI] << std::endl;
+
+        res.set_content(this->sendBuffer[playerI], "application/json");
     });
 
     // svr.Post("/duel", [&](const Request& req, Response& res) {
