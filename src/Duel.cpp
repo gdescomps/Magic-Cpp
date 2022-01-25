@@ -35,13 +35,13 @@ void Duel::performDuel() {
 
   for(Creature* blocker : blockers) {
     // pre attack hooks
-    for(auto a : attacker->getAbilities()) a->usePreAttack(*this);
+    for(auto a : attacker->getAbilities()) a->usePreAttack(*this, blocker);
     for(auto a : blocker->getAbilities()) a->usePreBlock(*this, blocker);
 
     performAttack(attacker, blocker);
 
     // post attack hooks
-    for(auto a : attacker->getAbilities()) a->usePostAttack(*this);
+    for(auto a : attacker->getAbilities()) a->usePostAttack(*this, blocker);
     for(auto a : blocker->getAbilities()) a->usePostBlock(*this, blocker);
   }
   
@@ -50,7 +50,7 @@ void Duel::performDuel() {
   
   // post duel hooks
   for(auto a : attacker->getAbilities()) a->usePostDuel(*this, attacker);
-  for(auto b : blockers) for(auto a : b->getAbilities()) a->usePreDuel(*this, b);
+  for(auto b : blockers) for(auto a : b->getAbilities()) a->usePostDuel(*this, b);
 }
 
 DuelValidation::operator bool() { return isOk; }

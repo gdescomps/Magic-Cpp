@@ -10,13 +10,14 @@ class Ability {
 public:  
   virtual bool validateAttack(Duel const&) { return true; }
   virtual bool validateBlock(Duel const&, Creature*) { return true; }
-
-  virtual void usePreAttack(Duel&) { }
-  virtual void usePostAttack(Duel&) { }
-  virtual void usePreBlock(Duel&, Creature*) { }
-  virtual void usePostBlock(Duel&, Creature*) { }
-  virtual void usePreDuel(Duel&, Creature*) { }
-  virtual void usePostDuel(Duel&, Creature*) { }
+  
+  // for below methods, the Creature* param is the blocker.
+  virtual void usePreAttack(Duel&, Creature* /* blocker */) { }
+  virtual void usePostAttack(Duel&, Creature* /* blocker */) { }
+  virtual void usePreBlock(Duel&, Creature* /* blocker */) { }
+  virtual void usePostBlock(Duel&, Creature* /* blocker */) { }
+  virtual void usePreDuel(Duel&, Creature* /* blocker */) { }
+  virtual void usePostDuel(Duel&, Creature* /* blocker */) { }
 
   virtual std::string getName() const = 0;
   virtual std::string getDesc() const { return ""; }

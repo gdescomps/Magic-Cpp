@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <numeric>
 
 #include "Creature.hpp"
 #include "Ability.hpp"
@@ -275,13 +276,25 @@ void Interface::drawCard(WINDOW* wrect, Creature const* creature) {
   int off = 1 + drawCardHeader(wrect, creature);
   
   // abilities
-  for(auto ability : creature->getAbilities()) {
-    auto name = ability->getName() + ": ";
-    auto desc = ability->getDesc();
+  if(creature->getAbilities().size() <= 3) {
+    for(auto ability : creature->getAbilities()) {
+      auto name = ability->getName() + ": ";
+      auto desc = ability->getDesc();
+      wattron(wrect, A_BOLD);
+      mvwprintw(wrect, off, 0, name.c_str());
+      wattroff(wrect, A_BOLD);
+      off += 1 + writeText(wrect, off, name.size(), desc.c_str(), w);
+    }
+  }
+  else {
     wattron(wrect, A_BOLD);
-    mvwprintw(wrect, off, 0, name.c_str());
+    mvwprintw(wrect, off, 0, "Abilities: ");
     wattroff(wrect, A_BOLD);
-    off += writeText(wrect, off, name.size(), desc.c_str(), w);
+    auto const& a = creature->getAbilities();
+    auto msg = std::accumulate(++a.begin(), a.end(), a[0]->getName(), [] (std::string acc, Ability* a) {
+      return acc + ", " + a->getName();
+    });
+    writeText(wrect, off, 11, msg.c_str(), w);
   }
 
   // power / toughness
@@ -352,7 +365,7 @@ bool Interface::promptYesNo(std::string const& msg) {
 int Interface::writeText(WINDOW* win, int y, int x, std::string msg, int maxW) {
   int i = 0;
   while(msg.size()) {
-    std::string row = msg.substr(0, maxW);
+    std::string row = msg.substr(0, maxW - x);
     msg = msg.substr(row.size(), msg.size());
     if(msg.size() && !std::isspace(msg[0])) {
       auto it = std::find_if(row.rbegin(), row.rend(), [] (char c) { return std::isspace(c); });
@@ -363,6 +376,7 @@ int Interface::writeText(WINDOW* win, int y, int x, std::string msg, int maxW) {
     }
     msg.erase(msg.begin(), std::ranges::find_if(msg, [] (char c) { return !std::isspace(c); }));
     wmove(win, y, x);
+    x = 0;
     wprintw(win, row.c_str());
     y++;
     i++;

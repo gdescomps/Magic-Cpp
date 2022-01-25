@@ -11,7 +11,7 @@ class Flying : public Ability {
 public:
   bool validateAttack(Duel const& duel) override {
     Ability* reach = Reach::getInst();
-    return std::all_of(duel.blockers.begin(), duel.blockers.end(), [=] (Creature* b) {
+    return std::all_of(duel.blockers.begin(), duel.blockers.end(), [&] (Creature* b) {
       return b->hasAbility(this) || b->hasAbility(reach);
     });
   }

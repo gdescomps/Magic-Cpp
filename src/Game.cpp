@@ -17,6 +17,8 @@
 #include "creatures/RatMan.hpp"
 #include "creatures/SerraAngel.hpp"
 #include "creatures/Theresa.hpp"
+#include "creatures/Tau.hpp"
+#include "creatures/Thanos.hpp"
 
 #include "abilities/Haste.hpp"
 #include "abilities/Vigilance.hpp"
@@ -45,6 +47,8 @@ std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
   res.push_back(std::make_unique<RatMan>());
   res.push_back(std::make_unique<SerraAngel>());
   res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Tau>());
+  res.push_back(std::make_unique<Thanos>());
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
@@ -221,7 +225,7 @@ bool Game::placeCreature(Player* player) {
   }
 
   // place the creature
-  if(!selected->hasAbility(Haste::getInst()))
+  if(!selected->hasAbility<Haste>())
     selected->tap();
   selected->setState(Card::State::BATTLEFIELD);
   return true;
@@ -302,7 +306,7 @@ bool Game::attackPhase(Player* player) {
   for(auto& duel : duels) {
     duel.performDuel();
     
-    if(duel.attacker->hasAbility(Vigilance::getInst()))
+    if(duel.attacker->hasAbility<Vigilance>())
       duel.attacker->tap();
     
     // reset cards stats

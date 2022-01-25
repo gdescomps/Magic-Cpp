@@ -1,19 +1,25 @@
 #pragma once
 
 #include "../Ability.hpp"
+#include "../Duel.hpp"
+#include "../Creature.hpp"
 
-class Reach : public Ability {
+class DeathTouch : public Ability {
 public:
   std::string getName() const override {
-    return "Reach";
+    return "DeathTouch";
   }
   
   std::string getDesc() const override {
     return "Can block Flying creatures.";
   }
   
-  static Reach* getInst() {
-    static Reach inst;
+  void usePostAttack(Duel&, Creature* blocker) override {
+    blocker->setToughness(0);
+  }
+  
+  static DeathTouch* getInst() {
+    static DeathTouch inst;
     return &inst;
   }
 };

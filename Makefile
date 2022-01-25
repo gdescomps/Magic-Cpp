@@ -19,7 +19,7 @@ all: bin/magic
 bin/%.o: src/%.cpp src/%.hpp
 	$(CC) $(CFLAGS) -c $< -o $(subst .cpp,.o,$(subst src/,bin/,$<))
 
-bin/magic: $(OBJS) src/main.cpp
+bin/magic: $(OBJS) src/*.hpp src/main.cpp
 	g++ $(CFLAGS) $(OBJS) src/main.cpp -o bin/magic $(LDFLAGS)
 
 clean:
