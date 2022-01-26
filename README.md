@@ -1,12 +1,19 @@
 # Magic-Cpp
+Remake of some parts of the game "Magic: The Gathering" in C++ 20
 
-## deadlines
+Advanced C++ course project 
 
-### vendredi 21 janvier 23:59
+Subject : ![docs/Projet.pdf](docs/Projet.pdf)
 
-**rapport** : manuel d'utilisation, instructions d'installation, de lancement, liste des fonctionnalités + comment (captures d'écran), difficultés rencontrées
+### Used libraries
+| Name | Link |
+| - | - |
+| ncurses | https://invisible-island.net/ncurses/ncurses.html |
+| httplib | https://github.com/yhirose/cpp-httplib |
+| rapidjson | https://github.com/Tencent/rapidjson |
 
-### vendredi 26 janvier
-après midi : **démo**, soir : **code complet**
 
-Dans les deux cas à envoyer à Marc Fonvielle et Joël Gay
+* Mathis Brossier
+* Guillaume Descomps
+
+ET4 Informatique Polytech Paris-Saclay (2022)
