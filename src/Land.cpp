@@ -20,7 +20,7 @@ std::string Land::getName() const {
 
 std::string Land::getType() const {
   static std::array<std::string, 5> const names = {
-    "White", "Blue", "Black", "Red", "Forest"
+    "White", "Blue", "Black", "Red", "Green"
   };
   return "Land - " + names[(size_t)mana] + " mana"; // using enum indexing order in the lookup of names
 }

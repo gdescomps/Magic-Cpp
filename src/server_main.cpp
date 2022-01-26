@@ -26,9 +26,9 @@ int main()
 
     iface.showCard(&c);
 
-    Land l(Mana::BLACK);
+    // Land l(Mana::GREEN);
 
-    iface.showCard(&l);
+    // iface.showCard(&l);
 
     s.start();
 

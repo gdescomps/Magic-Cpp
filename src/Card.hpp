@@ -2,6 +2,7 @@
 
 #include "Mana.hpp"
 
+#include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
@@ -33,6 +34,7 @@ public:
   virtual ManaCost getCost() const = 0;
   virtual Mana getMana() const = 0;
   virtual std::vector<Ability const*> getAbilities() const { return {}; }
+  virtual std::string getId() const {return this->getName(); }
 
   virtual std::string toJson() const {
 
@@ -44,8 +46,8 @@ public:
     writer.StartObject();
     writer.Key("dataType");
     writer.String("card");
-    writer.Key("cardId");
-    writer.Int(cardId);
+    writer.Key("id");
+    writer.String(this->getId().c_str());
     writer.Key("isTapped");
     writer.Bool(this->isTapped());
     writer.Key("state");
@@ -53,6 +55,17 @@ public:
     writer.EndObject();
 
     return s.GetString();
+
+  }
+
+  virtual void fromJson(std::string json) {
+    using namespace rapidjson;
+
+    Document d;
+    d.Parse(json.c_str());
+
+    d["isTapped"].GetBool() ? this->tap() : this->untap() ;
+    this->setState(static_cast<State>(d["state"].GetInt()));
 
   }
 

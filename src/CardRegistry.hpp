@@ -21,8 +21,8 @@ public:
 
   template<class C>
   int registerCard() {
-    std::cout << "hello" << std::endl;
-    auto name = C().getName();
+    // std::cout << "hello" << std::endl;
+    auto name = C().getId();
     factories[name] = []() { return new C(); };
     return factories.size() - 1;
   }

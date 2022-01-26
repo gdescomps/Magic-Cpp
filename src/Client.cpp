@@ -90,11 +90,16 @@ void Client::poll(){
 
     else if(dataType.compare("card") == 0){
 
-      int cardId = d["cardId"].GetInt();
+      std::string name = d["id"].GetString();
 
 
       // auto card = CardRegistry::getInst().create<Card>(cardId);
-      auto card = CardRegistry::getInst().create<Card>("SerraAngel");
+      auto card = CardRegistry::getInst().create<Card>(name);
+      
+      // card.get()->fromJson("{\"dataType\":\"card\",\"name\":\"Forest\",\"isTapped\":false,\"state\":0,\"mana\":4}");
+      card.get()->fromJson(res->body);
+
+      // ui->tell("testdsiuh");
 
       ui->showCard(card.get());
 
