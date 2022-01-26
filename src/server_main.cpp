@@ -30,7 +30,7 @@ int main()
 
     iface.showCard(&l);
 
-    // s.start();
+    s.start();
 
     return 0;
 
