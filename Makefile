@@ -32,14 +32,13 @@ src/Client.cpp \
 src/Land.cpp \
 src/CardRegistry.cpp
 
-
 OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SRCS)))
 
 SERVER_OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(SERVER_SRCS)))
 
 CLIENT_OBJS=$(subst .cpp,.o,$(subst src/,bin/,$(CLIENT_SRCS)))
 
-.PHONY: clean
+.PHONY: clean clean_all
 
 all: bin/magic
 
@@ -52,14 +51,13 @@ bin/magic: $(OBJS) src/main.cpp
 server: $(SERVER_OBJS) src/server_main.cpp
 	$(CC) $(CFLAGS) $(SERVER_OBJS) src/server_main.cpp -o bin/server $(LDFLAGS)
 
-server_test: $(SERVER_OBJS) src/server_test.cpp
-	$(CC) $(CFLAGS) $(SERVER_OBJS) src/server_test.cpp -o bin/server_test $(LDFLAGS)
-
 client: $(CLIENT_OBJS) src/client_main.cpp
 	$(CC) $(CFLAGS) $(CLIENT_OBJS) src/client_main.cpp -o bin/client $(LDFLAGS)
-
 
 clean:
 	rm -f bin/*.o
 	rm -f bin/magic
-	rm -f bin/server_test
+
+clean_all: clean
+	rm -f bin/server
+	rm -f bin/client

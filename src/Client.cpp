@@ -31,25 +31,21 @@ void Client::poll(){
   std::string request = "/poll/" + std::to_string(playerI);
 
   if ( auto res = cli->Get(request.c_str()) ) {
-    if(res.value().body == "void") return;
-    // cout << res->status << endl;
-    // cout << res->get_header_value("Content-Type") << endl;
-    // cout << res->body << endl;
 
-    // 1. Parse a JSON string into DOM.
+    // If we received nothing exit
+    if(res.value().body == "void") return;
+
+    // Parse the received JSON string into DOM
     const char* json = res->body.c_str();
     Document d;
     d.Parse(json);
 
-    // 2. Modify it by DOM.
+    // Get which type of data has been received
     Value& s = d["dataType"];
-
     string dataType = s.GetString();
 
-    // cout << dataType << endl;
-
+    // Treat received data according to its type
     if(dataType.compare("menu") == 0){
-      // cout << "menu received"<< endl;
       string msg = d["msg"].GetString();
 
       auto entries = d["entries"].GetArray();
@@ -57,7 +53,6 @@ void Client::poll(){
       std::vector<MenuEntry> menuEntries;
 
       for(SizeType i = 0; i < entries.Size(); i++) {
-        // cout << entries[i].GetObject()["text"].GetString() << endl;
 
         string text = entries[i].GetObject()["text"].GetString();
         MenuEntry::State state = static_cast<MenuEntry::State>(entries[i].GetObject()["state"].GetInt());
@@ -96,14 +91,9 @@ void Client::poll(){
 
       std::string name = d["id"].GetString();
 
-
-      // auto card = CardRegistry::getInst().create<Card>(cardId);
       auto card = CardRegistry::getInst().create<Card>(name);
       
-      // card.get()->fromJson("{\"dataType\":\"card\",\"name\":\"Forest\",\"isTapped\":false,\"state\":0,\"mana\":4}");
       card.get()->fromJson(res->body);
-
-      // ui->tell("testdsiuh");
 
       ui->showCard(card.get());
 
@@ -224,7 +214,8 @@ void Client::poll(){
 
 
   } else {
-
+    // We have received an error, display it in the user interface
+    
     std::stringstream sstm;
     sstm << " error code: " << res.error();
 

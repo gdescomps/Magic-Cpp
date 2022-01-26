@@ -16,7 +16,6 @@
 
 #include "GameServer.hpp"
 
-// class GameServer;
 
 /** A menu entry. 
     Can be created from a string with default state of 'NORMAL', or also provide a state. */
@@ -44,9 +43,10 @@ public:
   State state; 
 };
 
-/** The game terminal-based user interface.
-    It uses the library ncurse to manage drawing on the terminal.
-    The ui is composed of a header bar (title), a main screen and a prompt. */
+/** The server interface.
+    It transmit commands from the game to the players' clients, and the opposite way
+    Most of the data transmitted to the player is formatted in json
+*/
 class Interface {
 public:
   Interface(GameServer* s) : server(s) {};
@@ -92,9 +92,14 @@ public:
       @return the selected entry index in choices, or -1 if cancelled. */
   int showMenu(int player, std::string const& msg, std::vector<MenuEntry> choices);
   
+  /**
+   * @brief Set the current Player 
+   * @param player playerID (0 or 1)
+   */
   void setPlayer(int player);
 
 private:
+  /** The GameServer instance */
   GameServer* server;
 };
 
