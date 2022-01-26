@@ -22,4 +22,6 @@ public:
   Mana getMana() const override {
     return Mana::BLUE;
   }
+
+
 };

@@ -9,6 +9,8 @@
 #include <string>
 
 #include "GameServer.hpp"
+#include "Game.hpp"
+
 
 #include "creatures/AirBender.hpp"
 #include "creatures/BrandonSoupSirup.hpp"

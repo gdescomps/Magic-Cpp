@@ -6,11 +6,17 @@
 #include <sstream>
 #include <iostream>
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
 #include "Card.hpp"
 #include "Creature.hpp"
 #include "Land.hpp"
 
-class GameServer;
+#include "GameServer.hpp"
+
+// class GameServer;
 
 /** A menu entry. 
     Can be created from a string with default state of 'NORMAL', or also provide a state. */
@@ -95,7 +101,55 @@ private:
 template <class C>
 inline void Interface::showCard(C const *card)
 {
-  // int cardI = std::find(server->deckP1.begin(), server->deckP1.end(), card); 
+  // using namespace rapidjson;
   
-  std::cout << card->getName() << " i:" << std::endl;
+  // // int cardI = std::find(server->deckP1.begin(), server->deckP1.end(), card); 
+
+  // int classId = 1; // a modifier
+
+  // StringBuffer s;
+  // Writer<StringBuffer> writer(s);
+
+  // writer.StartObject();
+  // writer.Key("dataType");
+  // writer.String("card");
+  // writer.Key("type");
+  // writer.Int(classId);
+  // // writer.Key("data");
+
+  // // writer.StartObject();
+  // // writer.Key("name");
+  // // writer.String(card->getName().c_str());
+  // // writer.EndObject();
+
+  // writer.EndObject();
+
+  // std::cout << s.GetString() << std::endl;
+
+  // Document cardDoc;
+  // Pointer("/name").Set(cardDoc, card->getName());
+
+
+  // Document d;
+  // d.Parse(s.GetString());
+
+  // Pointer("/data/name").Create(d);
+
+  // // 2. Modify it by DOM.
+  // Value& val = d["type"];
+  // val.SetInt(val.GetInt() + 1);
+
+  // // 3. Stringify the DOM
+  // StringBuffer buffer;
+  // Writer<StringBuffer> writer2(buffer);
+  // d.Accept(writer2);
+
+  // // Output {"project":"rapidjson","stars":11}
+  // std::cout << buffer.GetString() << std::endl;
+
+
+  // // this->server->send(s.GetString());
+  std::cout << card->getName() << std::endl;
+  std::cout << card->toJson() << std::endl;
+
 }

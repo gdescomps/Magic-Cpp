@@ -6,6 +6,8 @@ Player::Player(Cards deck)
   : deck(move(deck)), hp(20)
 {}
 
+
+// TODO : draw random card
 Card* Player::drawCard() {
   auto pred = [] (auto& c) { return c->getState() == Card::State::LIBRARY; };
   auto card = std::find_if(deck.begin(), deck.end(), pred);

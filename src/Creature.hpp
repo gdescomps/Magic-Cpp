@@ -6,6 +6,11 @@
 
 #include "Duel.hpp"
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
+
 class Creature : public Card {
 
 private:
@@ -28,5 +33,24 @@ public:
     void setToughness(int t) { this->toughness = t; }
 
     virtual void attack(Creature* adversary);
+    
+    virtual std::string toJson() const override { 
+        using namespace rapidjson;
+
+        Document d;
+        d.Parse(Card::toJson().c_str());
+
+        d.AddMember("power", this->getPower(), d.GetAllocator());
+        d.AddMember("basePower", this->getBasePower(), d.GetAllocator());
+        d.AddMember("toughness", this->getToughness(), d.GetAllocator());
+        d.AddMember("baseToughness", this->getBaseToughness(), d.GetAllocator());
+
+        StringBuffer buffer;
+        Writer<StringBuffer> writer(buffer);
+        d.Accept(writer);
+
+        return buffer.GetString(); 
+    
+    }
 
 };

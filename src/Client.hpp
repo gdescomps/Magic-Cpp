@@ -13,8 +13,12 @@ public:
 
     void poll();
 
+    int playerI;
+
 private:
     
     httplib::Client* cli;
     UserInterface* ui;
+
+    
 };
