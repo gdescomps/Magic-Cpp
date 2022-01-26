@@ -8,7 +8,7 @@ class UserInterface;
 class Client {
 
 public:
-    Client();
+    Client(int player);
     ~Client();
 
     void poll();

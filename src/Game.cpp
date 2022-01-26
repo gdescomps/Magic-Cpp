@@ -87,8 +87,9 @@ int getInt(std::string s) {
 }
 
 
-Game::Game()
-  : player1(makePlayer1Deck()),
+Game::Game(Interface iface)
+  : iface(iface),
+    player1(makePlayer1Deck()),
     player2(makePlayer2Deck())
 {
   // TODO: this is temporary
@@ -117,30 +118,32 @@ void Game::play() {
   for(size_t i = 0; i < 7; i++) {
     adversary->drawCard();
   }
-
-  iface.tell(getPlayerName(player) + " starts playing.");
+  
+  iface.tell(playerIndex(player), getPlayerName(player) + " starts playing.");
 
   while(playTurn(player)) {
     player = switchPlayer(player);
-    iface.tell(getPlayerName(player) + " starts playing.");
+    iface.tell(0, getPlayerName(player) + " starts playing.");
+    iface.tell(1, getPlayerName(player) + " starts playing.");
   }
 
   player = switchPlayer(player);
-  iface.tell("Game has ended, " + getPlayerName(player) + " wins.");
+  iface.tell(0, "Game has ended, " + getPlayerName(player) + " wins.");
+  iface.tell(1, "Game has ended, " + getPlayerName(player) + " wins.");
 }
 
 bool Game::drawPhase(Player* player) {
   Card* drawn = player->drawCard();
 
   if(drawn == nullptr) {
-    iface.tell(getPlayerName(player) + " has an empty library.");
+    iface.tell(playerIndex(player), "you have empty library.");
     // layer loses
     return false;
   }
 
-  iface.showCard(drawn);
-  iface.tell(getPlayerName(player) + " drew a card.");
-  iface.hideAll();
+  iface.showCard(playerIndex(player), drawn);
+  iface.tell(playerIndex(player), getPlayerName(player) + " drew a card.");
+  iface.hideAll(playerIndex(player));
   return true;
 }
 
@@ -150,19 +153,19 @@ bool Game::placeLand(Player* player) {
 
   // ask to place a land
   if(lands.size() != 0) {
-    Card* card = iface.selectCard("Place a land?", lands);
+    Card* card = iface.selectCard(playerIndex(player), "Place a land?", lands);
     if(card != nullptr) {
       card->setState(Card::State::BATTLEFIELD);
       lands.erase(std::ranges::find(lands, card)); // remove placed card from vec of placeable lands
       return true;
     }
     else {
-      iface.tell("No land was placed.");
+      iface.tell(playerIndex(player), "No land was placed.");
     }
   }
 
   else {
-    iface.tell("No land to place.");
+    iface.tell(playerIndex(player), "No land to place.");
   }
 
   return false;
@@ -181,12 +184,12 @@ bool Game::placeCreature(Player* player) {
   // find placeable creatures
   auto placeables = player->getPlaceableCards<Creature>(avail);
   if(placeables.size() == 0) {
-    iface.tell("No placeable creature.");
+    iface.tell(playerIndex(player), "No placeable creature.");
     return false;
   }
 
   // ask creature to place
-  auto selected = iface.selectCard("Which creature do you wish to place?", placeables);
+  auto selected = iface.selectCard(playerIndex(player), "Which creature do you wish to place?", placeables);
   if(selected == nullptr) return false;
   
   // tap specific manas
@@ -203,7 +206,7 @@ bool Game::placeCreature(Player* player) {
   
   // tab any mana
   while(remain.getAny() > 0) {
-    auto selected = iface.selectCards("Select lands to tap (" + std::to_string(remain.getAny()) + " missing)", lands);
+    auto selected = iface.selectCards(playerIndex(player), "Select lands to tap (" + std::to_string(remain.getAny()) + " missing)", lands);
     for(auto land : selected) {
       land->tap();
       remain.setAny(remain.getAny() - 1);
@@ -228,12 +231,12 @@ bool Game::attackPhase(Player* player) {
   std::erase_if(availAttackers, [] (Card* c) { return c->isTapped(); });
 
   if(availAttackers.size() == 0) {
-    iface.tell("No creature to use in attack");
+    iface.tell(playerIndex(player), "No creature to use in attack");
     return false;
   }
 
   // ask creatures to use
-  std::vector<Creature*> attackers = iface.selectCards<Creature>("Select creatures to use in attack", availAttackers);
+  std::vector<Creature*> attackers = iface.selectCards<Creature>(playerIndex(player), "Select creatures to use in attack", availAttackers);
   if(attackers.size() == 0) return false;
 
   // find creatures usable as blockers
@@ -243,16 +246,16 @@ bool Game::attackPhase(Player* player) {
   // ask adversary for blockers
   while(attackers.size() != 0 && availBlockers.size() != 0) {
 
-    // choose an attacker
-    Creature* attacker = iface.selectCard(p2Name + ", choose a card to block", attackers);
+    // choose an attacker to block
+    Creature* attacker = iface.selectCard(playerIndex(adversary), "Choose a card to block", attackers);
     if(attacker == nullptr) {
-      bool resp = iface.promptYesNo("Finished choosing blockers?");
+      bool resp = iface.promptYesNo(playerIndex(adversary), "Finished choosing blockers?");
       if(resp) break;
       else continue;
     }
 
-    // choose blockers
-    auto blockers = iface.selectCards("Choose cards to block this attacker", availBlockers);
+    // choose blockers for the chosen attacker
+    auto blockers = iface.selectCards(playerIndex(adversary), "Choose cards to block this attacker", availBlockers);
 
     // create the duel and remove attacker / blockers
     duels.emplace_back(attacker, blockers);
@@ -267,7 +270,7 @@ bool Game::attackPhase(Player* player) {
     for(auto& duel : duels) if(duel.second.size() >= 2) {
       for(size_t i = 0; i < duel.second.size() - 1; i++) {
         Card* card;
-        do card = iface.selectCard("Choose the " + getOrdinal(i) + " card to attack with your " + duel.first->getName(), duel.second);
+        do card = iface.selectCard(playerIndex(player), "Choose the " + getOrdinal(i) + " card to attack with your " + duel.first->getName(), duel.second);
         while(card == nullptr);
         std::iter_swap(duel.second.begin() + i, std::ranges::find(duel.second, card));
       }
@@ -304,14 +307,16 @@ bool Game::attackPhase(Player* player) {
         deadNames += ", " + (*it)->getName();
       }
 
-      iface.tell(p2Name + " lost it's " + duel.attacker->getName() + " against " + p1Name +"'s attacker !");
+      iface.tell(0, p2Name + " lost it's " + duel.attacker->getName() + " against " + p1Name +"'s attacker !");
+      iface.tell(1, p2Name + " lost it's " + duel.attacker->getName() + " against " + p1Name +"'s attacker !");
       for(auto blocker : deadBlockers)
         blocker->setState(Card::State::GRAVEYARD);
     }
 
     // Move dead attacker to Graveyard
     if(duel.attacker->getToughness() == 0) {
-      iface.tell(p1Name + " lost it's " + duel.attacker->getName() + " against " + p2Name +"'s blocker(s) !");
+      iface.tell(0, p1Name + " lost it's " + duel.attacker->getName() + " against " + p2Name +"'s blocker(s) !");
+      iface.tell(1, p1Name + " lost it's " + duel.attacker->getName() + " against " + p2Name +"'s blocker(s) !");
       duel.attacker->setState(Card::State::GRAVEYARD);
     }
   }
@@ -320,7 +325,7 @@ bool Game::attackPhase(Player* player) {
 }
 
 void Game::menuShowCards(Player* player) {
-  int choice = iface.showMenu("What to show?", {
+  int choice = iface.showMenu(playerIndex(player), "What to show?", {
     "Show HP",
     "Show your hand",
     "Show your battlefield",
@@ -331,7 +336,7 @@ void Game::menuShowCards(Player* player) {
   if(choice == 0) { // show HP
     auto msg = getPlayerName(&player1) + "'s HP: " + std::to_string(player1.getHP()) + ", "
              + getPlayerName(&player2) + "'s HP: " + std::to_string(player2.getHP()); 
-    iface.tell(msg);
+    iface.tell(playerIndex(player), msg);
   }
 
   else if(choice == 1) { // show player hand
@@ -339,9 +344,9 @@ void Game::menuShowCards(Player* player) {
     auto cards = player->getCardsInState<Card>(Card::State::HAND);
 
     if(cards.size() > 0)
-      iface.showCards(msg, cards);
+      iface.showCards(playerIndex(player), msg, cards);
     else
-      iface.tell("Hand is empty");
+      iface.tell(playerIndex(player), "Hand is empty");
   }
 
   else if(choice == 2) { // show battlefield
@@ -349,9 +354,9 @@ void Game::menuShowCards(Player* player) {
     auto cards = player->getCardsInState<Card>(Card::State::BATTLEFIELD);
 
     if(cards.size() > 0)
-      iface.showCards(msg, cards);
+      iface.showCards(playerIndex(player), msg, cards);
     else
-      iface.tell("Battlefield is empty");
+      iface.tell(playerIndex(player), "Battlefield is empty");
   }
 
   else if(choice == 3) { // show adversary battlefield
@@ -360,9 +365,9 @@ void Game::menuShowCards(Player* player) {
     auto cards = adversary->getCardsInState<Card>(Card::State::BATTLEFIELD);
 
     if(cards.size() > 0)
-      iface.showCards(msg, cards);
+      iface.showCards(playerIndex(player), msg, cards);
     else
-      iface.tell("Battlefield is empty");
+      iface.tell(playerIndex(player), "Battlefield is empty");
   }
 }
 
@@ -385,7 +390,7 @@ bool Game::playTurn(Player* player) {
 
   while(cont) {
 
-    int choice = iface.showMenu(getPlayerName(player) + ", what to do?", {
+    int choice = iface.showMenu(playerIndex(player), getPlayerName(player) + ", what to do?", {
       "Show...",
       MenuEntry("Place a Land", canPlaceLand ? NORMAL : DISABLED),
       "Place a Creature",

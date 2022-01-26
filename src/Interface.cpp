@@ -9,12 +9,22 @@
 using namespace rapidjson;
 using namespace std;
 
-void Interface::tell(std::string const &msg)
+void Interface::tell(int player, std::string const &msg)
 {
-  std::cout << msg << std::endl;
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
+
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("tell");
+  writer.Key("msg");
+  writer.String(msg.c_str());
+  writer.EndObject();
+
+  this->server->send(player, s.GetString());
 }
 
-int Interface::showMenu(std::string const &msg, std::vector<MenuEntry> choices)
+int Interface::showMenu(int player, std::string const &msg, std::vector<MenuEntry> choices)
 {
 
   StringBuffer s;
@@ -41,14 +51,12 @@ int Interface::showMenu(std::string const &msg, std::vector<MenuEntry> choices)
   writer.EndArray();
   writer.EndObject();
 
-  // cout << s.GetString() << endl;
+  this->server->send(player, s.GetString());
 
-  this->server->send(s.GetString());
-
-  return this->server->getChoice();
+  return this->server->getChoice(player);
 }
 
-bool Interface::promptYesNo(std::string const &msg)
+bool Interface::promptYesNo(int player, std::string const &msg)
 {
   StringBuffer s;
   Writer<StringBuffer> writer(s);
@@ -60,12 +68,12 @@ bool Interface::promptYesNo(std::string const &msg)
   writer.String(msg.c_str());
   writer.EndObject();
 
-  this->server->send(s.GetString());
+  this->server->send(player, s.GetString());
 
-  return this->server->getChoice() == 1;
+  return this->server->getChoice(player) == 1;
 }
 
-void Interface::hideAll(){
+void Interface::hideAll(int player){
   StringBuffer s;
   Writer<StringBuffer> writer(s);
 
@@ -74,5 +82,5 @@ void Interface::hideAll(){
   writer.String("hideAll");
   writer.EndObject();
 
-  this->server->send(s.GetString());
+  this->server->send(player, s.GetString());
 }

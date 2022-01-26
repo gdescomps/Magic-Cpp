@@ -24,48 +24,6 @@
 
 using namespace httplib;
 
-std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
-  std::vector<std::unique_ptr<Card>> res;
-  res.push_back(std::make_unique<AirBender>());
-  res.push_back(std::make_unique<BrandonSoupSirup>());
-  res.push_back(std::make_unique<CrownTheVirulent>());
-  res.push_back(std::make_unique<JackSeparou>());
-  res.push_back(std::make_unique<LeojTheMerciful>());
-  res.push_back(std::make_unique<PolyNinja>());
-  res.push_back(std::make_unique<RatMan>());
-  res.push_back(std::make_unique<SerraAngel>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Land>(Mana::BLACK));
-  res.push_back(std::make_unique<Land>(Mana::BLACK));
-  res.push_back(std::make_unique<Land>(Mana::BLACK));
-  res.push_back(std::make_unique<Land>(Mana::BLUE));
-  res.push_back(std::make_unique<Land>(Mana::BLUE));
-  res.push_back(std::make_unique<Land>(Mana::BLUE));
-  res.push_back(std::make_unique<Land>(Mana::GREEN));
-  res.push_back(std::make_unique<Land>(Mana::GREEN));
-  res.push_back(std::make_unique<Land>(Mana::GREEN));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::RED));
-  res.push_back(std::make_unique<Land>(Mana::WHITE));
-  res.push_back(std::make_unique<Land>(Mana::WHITE));
-  res.push_back(std::make_unique<Land>(Mana::WHITE));
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  res.push_back(std::make_unique<Theresa>());
-  return res;
-}
-
 std::string creatureToString(Creature* c){
     std::stringstream sstm;
     sstm << c->getName() << " " << c->getPower() << "/" << c->getToughness();
@@ -77,49 +35,38 @@ GameServer::GameServer() {
 
     std::cout << "Creating server..." << std::endl;
 
-    auto deck = makePlayer1Deck();
-
-    std::vector<Card*> res(deck.size());
-
-    for(size_t i = 0; i < deck.size(); i++) {
-        res[i] = deck[i].get();
-    }
-
-    this->deckP1 = res;
-
     this->sendBuffer = {"void", "void"};
     this->choice = {-1, -1};
     this->multiChoices = {std::vector<int>(),std::vector<int>()};
-
-    this->currentPlayer = 0;
-
 }
 
 GameServer::~GameServer(){}
 
-void GameServer::send(std::string s){
-    this->sendBuffer[this->currentPlayer] = s;
+void GameServer::send(int player, std::string s){
+    this->sendBuffer[player] = s;
     // std::cout << s << std::endl;
     this->listen();
 }
 
-int GameServer::getChoice() {
+int GameServer::getChoice(int player) {
     
-    this->choice[currentPlayer] = -2; // We want to receive from this player
-    
-    this->listen();
+    this->choice[player] = -2; // We want to receive from this player
+        
+    while(this->choice[player] == -2)
+        this->listen();
 
-    return this->choice[currentPlayer];
+    return this->choice[player];
 
 }
 
-std::vector<int> GameServer::getMultiChoices(){
+std::vector<int> GameServer::getMultiChoices(int player) {
 
-    this->choice[currentPlayer] = -2; // We want to receive from this player
+    this->choice[player] = -2; // We want to receive from this player
 
-    this->listen();
+    while(this->choice[player] == -2)
+        this->listen();
 
-    return this->multiChoices[currentPlayer];
+    return this->multiChoices[player];
 
 }
 
@@ -210,20 +157,20 @@ void GameServer::init(){
         // std::cout << this->sendBuffer[playerI] << std::endl;
 
         res.set_content(this->sendBuffer[playerI], "application/json");
+        this->sendBuffer[playerI] = "void";
         svr.stop();
     });
 
-    svr.Get(R"(/choice/(\d+)/(\d+))", [&](const Request &req, Response &res) {
+    svr.Get(R"(/choice/(\d+)/(-?\d+))", [&](const Request &req, Response &res) {
         
-        int playerI = std::stoi(req.matches[1]);
+        int player = std::stoi(req.matches[1]);
 
-        if(this->choice[this->currentPlayer] == -2 && playerI == this->currentPlayer) { // We have a choice to receive for this player
-
+        if(this->choice[player] == -2) { // We have a choice to receive for this player
             int choice = std::stoi(req.matches[2]);
 
-            this->choice[playerI] = choice;
+            this->choice[player] = choice;
 
-            res.set_content("Player "+ std::to_string(playerI) + " selected " + std::to_string(choice), "text/plain");
+            res.set_content("Player "+ std::to_string(player) + " selected " + std::to_string(choice), "text/plain");
             svr.stop();
         }
 
@@ -231,9 +178,11 @@ void GameServer::init(){
 
     svr.Get(R"(/multichoices/(\d+)/(\d+(,\d+)*))", [&](const Request &req, Response &res) {
         
-        int playerI = std::stoi(req.matches[1]);
+        int player = std::stoi(req.matches[1]);
 
-        if(this->choice[this->currentPlayer] == -2 && playerI == this->currentPlayer) { // We have choices to receive for this player
+        if(this->choice[player] == -2) { // We have choices to receive for this player
+            
+            this->multiChoices[player] = {};
 
             std::string s = req.matches[2];
 
@@ -247,11 +196,11 @@ void GameServer::init(){
                 std::string match_str = match.str();
                 int choice = std::stoi(match_str);
 
-                this->multiChoices[playerI].push_back(choice);
+                this->multiChoices[player].push_back(choice);
 
             }
 
-            res.set_content("Player "+ std::to_string(playerI) + " selected " + std::to_string(this->multiChoices[playerI].size()) + " options", "text/plain");
+            res.set_content("Player "+ std::to_string(player) + " selected " + std::to_string(this->multiChoices[player].size()) + " options", "text/plain");
             svr.stop();
         }
 

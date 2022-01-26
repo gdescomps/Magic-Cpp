@@ -11,13 +11,13 @@ public:
     GameServer();
     virtual ~GameServer();
 
-    void send(std::string s);
+    void send(int player, std::string s);
 
     void init();
     void listen();
 
-    int getChoice();
-    std::vector<int> getMultiChoices();
+    int getChoice(int player);
+    std::vector<int> getMultiChoices(int player);
 
 private:
     std::vector<Card*> deckP1, deckP2;
@@ -28,7 +28,6 @@ private:
     std::vector<int> choice;
     std::vector<std::vector<int>> multiChoices;
 
-    int currentPlayer;
 
     httplib::Server svr;
 };

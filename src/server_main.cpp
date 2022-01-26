@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+#include "Game.hpp"
 #include "GameServer.hpp"
 #include "Interface.hpp"
 #include "creatures/AirBender.hpp"
@@ -29,13 +30,14 @@ int main()
 
     // std::cout << "choice" << choice << std::endl;
 
-    
+    Game game(iface);
+    game.play();
 
-    std::vector<Card*> cards;
-    cards.push_back(new AirBender());
-    cards.push_back(new BrandonSoupSirup());
+    // std::vector<Card*> cards;
+    // cards.push_back(new AirBender());
+    // cards.push_back(new BrandonSoupSirup());
 
-    iface.showCards("card to show", cards);
+    // iface.showCards("card to show", cards);
 
     // AirBender c;
 

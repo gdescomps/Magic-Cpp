@@ -7,7 +7,7 @@
 class Game {
 
 public:
-Game();
+Game(Interface iface);
 
 /** Start a new Game. */
 void play();
@@ -27,6 +27,9 @@ private:
     
   /** Return a pointer to the other player. */
   Player* switchPlayer(Player* last);
+    
+  /** Return a pointer to the other player. */
+  int playerIndex(Player* p) { return p == &player1 ? 0 : 1; }
   
   /** Game phase where the player draws a card. */
   bool drawPhase(Player* player);

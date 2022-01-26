@@ -21,7 +21,8 @@ src/Player.cpp \
 src/Interface.cpp \
 src/UserInterface.cpp \
 src/Land.cpp  \
-src/CardRegistry.cpp
+src/CardRegistry.cpp \
+src/Game.cpp
 
 CLIENT_SRCS = \
 src/Card.cpp \

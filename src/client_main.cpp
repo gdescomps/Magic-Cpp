@@ -15,15 +15,22 @@
 #include <chrono>
 #include <thread>
 
-int main(void) {
+int main(int argc, char const** argv) {
+  
+  if(argc != 2) {
+    std::cout << "Usage: " << argv[0] << " <PlayerNum (0 or 1)>" << std::endl;
+    return 1;
+  }
+  
   CardRegistry::registerAllCards();
-  Client c;
+  int player = std::stoi(argv[1]);
+  Client c(player);
 
   while (true)
   {
       c.poll();
       using namespace std::chrono_literals;
-      std::this_thread::sleep_for(2000ms);
+      std::this_thread::sleep_for(200ms);
 
   }
   

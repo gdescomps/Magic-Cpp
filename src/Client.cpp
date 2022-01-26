@@ -16,29 +16,9 @@ using namespace rapidjson;
 
 
 
-Client::Client(){
-
+Client::Client(int player) : playerI(player) {
     this->cli = new httplib::Client("localhost", 8080);
     this->ui = new UserInterface();
-
-    this->playerI = 0; // TODO : Demander le numéro au serveur
-
-  // if ( auto res = cli.Get("/attacker/4") ) {
-  //   cout << res->status << endl;
-  //   cout << res->get_header_value("Content-Type") << endl;
-  //   cout << res->body << endl;
-  // } else {
-  //   cout << "error code: " << res.error() << std::endl;
-  // }
-
-  // if ( auto res = cli.Get("/blockers/1,2,3") ) {
-  //   cout << res->status << endl;
-  //   cout << res->get_header_value("Content-Type") << endl;
-  //   cout << res->body << endl;
-  // } else {
-  //   cout << "error code: " << res.error() << std::endl;
-  // }
-
 }
 
 Client::~Client(){
@@ -51,6 +31,7 @@ void Client::poll(){
   std::string request = "/poll/" + std::to_string(playerI);
 
   if ( auto res = cli->Get(request.c_str()) ) {
+    if(res.value().body == "void") return;
     // cout << res->status << endl;
     // cout << res->get_header_value("Content-Type") << endl;
     // cout << res->body << endl;
@@ -88,9 +69,7 @@ void Client::poll(){
       int choice = this->ui->showMenu(msg, menuEntries);
       
       std::string request = "/choice/" + std::to_string(playerI) + "/" + std::to_string(choice);
-      if ( auto res = cli->Get(request.c_str()) ) {
-
-      }
+      cli->Get(request.c_str());
 
     }
 
@@ -101,10 +80,12 @@ void Client::poll(){
       int choice = this->ui->promptYesNo(msg) ? 1 : 0;
       
       std::string request = "/choice/" + std::to_string(playerI) + "/" + std::to_string(choice);
-      if ( auto res = cli->Get(request.c_str()) ) {
+      cli->Get(request.c_str());
+    }
 
-      }
-
+    else if(dataType.compare("tell") == 0){
+      string msg = d["msg"].GetString();
+      this->ui->tell(msg);
     }
 
     else if(dataType.compare("hideAll") == 0){
@@ -159,6 +140,86 @@ void Client::poll(){
       }
 
       ui->showCards(msg, cards);
+    }
+
+    else if(dataType.compare("selectCard") == 0){
+
+      string msg = d["msg"].GetString();
+
+      auto entries = d["cards"].GetArray();
+      
+      std::vector<std::unique_ptr<Card>> ucards;
+      std::vector<Card*> cards;
+
+      for(SizeType i = 0; i < entries.Size() ; i++) {
+
+        rapidjson::StringBuffer buffer;
+
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        entries[i].Accept(writer);
+
+        rapidjson::Document result;
+        rapidjson::StringStream s(buffer.GetString());
+        result.ParseStream(s);
+
+        std::string cardJson = buffer.GetString();
+
+        std::string name = entries[i].GetObject()["id"].GetString();
+
+        auto card = CardRegistry::getInst().create<Card>(name);
+        cards.push_back(card.get());
+        ucards.push_back(move(card));
+      
+      }
+
+      Card* card = ui->selectCard(msg, cards);
+      auto it = std::ranges::find(cards, card);
+      int index = it == cards.end() ? -1 : it - cards.begin();
+      std::string request = "/choice/" + std::to_string(playerI) + "/" + std::to_string(index);
+      cli->Get(request.c_str());
+    }
+
+    else if(dataType.compare("selectCards") == 0){
+
+      string msg = d["msg"].GetString();
+
+      auto entries = d["cards"].GetArray();
+      
+      std::vector<std::unique_ptr<Card>> ucards;
+      std::vector<Card*> cards;
+
+      for(SizeType i = 0; i < entries.Size() ; i++) {
+
+        rapidjson::StringBuffer buffer;
+
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        entries[i].Accept(writer);
+
+        rapidjson::Document result;
+        rapidjson::StringStream s(buffer.GetString());
+        result.ParseStream(s);
+
+        std::string cardJson = buffer.GetString();
+
+        std::string name = entries[i].GetObject()["id"].GetString();
+
+        auto card = CardRegistry::getInst().create<Card>(name);
+        cards.push_back(card.get());
+        ucards.push_back(move(card));
+      
+      }
+
+      auto selected = ui->selectCards(msg, cards);
+      string resp;
+      if(selected.size() != 0) {
+        resp = std::to_string(std::ranges::find(cards, selected[0]) - cards.begin());
+        for(size_t i = 1; i < selected.size(); i++) {
+          resp += ",";
+          resp += std::to_string(std::ranges::find(cards, selected[i]) - cards.begin());
+        } 
+      }
+      std::string request = "/choice/" + std::to_string(playerI) + "/" + resp;
+      cli->Get(request.c_str());
     }
 
 

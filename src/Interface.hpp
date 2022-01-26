@@ -50,48 +50,49 @@ public:
 class Interface {
 public:
   Interface(GameServer* s) : server(s) {};
-  ~Interface(){};
   
   /** Show a card details centered on the screen.
       Note: call hideAll() to hide */  
   template<class C>
-  void showCard(C const* c);
+  void showCard(int player, C const* c);
   
   /** Show cards details centered on the screen.
       Note: call hideAll() to hide */
   template<class C>
-  void showCards(std::string const& msg, std::vector<C*> const& cards);
+  void showCards(int player, std::string const& msg, std::vector<C*> const& cards);
 
   /** Show a selector menu to select a single card in a list.
       @param msg a message to prompt the user.
       @param cards a list of cards to choose from.
       @return the selected card or nullptr if selection was cancelled. */  
   template<class C>
-  C* selectCard(std::string const& msg, std::vector<C*> const& cards);
+  C* selectCard(int player, std::string const& msg, std::vector<C*> const& cards);
 
-//   /** Show a selector menu to select a single card in a list.
-//       @param msg a message to prompt the user.
-//       @param cards a list of cards to choose from.
-//       @return a possibly empty list of selected cards. */  
-//   template<class C>
-//   std::vector<C*> selectCards(std::string const& msg, std::vector<C*> const& cards);
+  /** Show a selector menu to select a single card in a list.
+      @param msg a message to prompt the user.
+      @param cards a list of cards to choose from.
+      @return a possibly empty list of selected cards. */  
+  template<class C>
+  std::vector<C*> selectCards(int player, std::string const& msg, std::vector<C*> const& cards);
   
   /** Hide content drawn on the main screen (not the header nor the prompt). */
-  void hideAll();
+  void hideAll(int player);
   
   /** Tell a message to the user. */
-  void tell(std::string const& msg);
+  void tell(int player, std::string const& msg);
 
   /** Ask a yes / no question to the user. 
       @param msg the question to ask.
       @return true if answer was 'yes', false if answer was 'no'. */
-  bool promptYesNo(std::string const& msg);
+  bool promptYesNo(int player, std::string const& msg);
 
   /** Show a menu. 
       @param msg the displayed menu name.
       @param choices the different menu entries.
       @return the selected entry index in choices, or -1 if cancelled. */
-  int showMenu(std::string const& msg, std::vector<MenuEntry> choices);
+  int showMenu(int player, std::string const& msg, std::vector<MenuEntry> choices);
+  
+  void setPlayer(int player);
 
 private:
   GameServer* server;
@@ -99,15 +100,13 @@ private:
 
 
 template <class C>
-inline void Interface::showCard(C const *card)
+inline void Interface::showCard(int player, C const *card)
 {
-
-  this->server->send(card->toJson());
-
+  this->server->send(player, card->toJson());
 }
 
 template<class C>
-inline void Interface::showCards(std::string const& msg, std::vector<C*> const& cards)
+inline void Interface::showCards(int player, std::string const& msg, std::vector<C*> const& cards)
 {
   using namespace rapidjson;
   StringBuffer s;
@@ -134,11 +133,75 @@ inline void Interface::showCards(std::string const& msg, std::vector<C*> const& 
 
   // std::cout << s.GetString() << std::endl;
 
-  this->server->send(s.GetString());
+  this->server->send(player, s.GetString());
 
 }
 
 template<class C>
-inline C* Interface::selectCard(std::string const& msg, std::vector<C*> const& cards){
-  
+inline C* Interface::selectCard(int player, std::string const& msg, std::vector<C*> const& cards){
+  using namespace rapidjson;
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
+
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("selectCard");
+  writer.Key("msg");
+  writer.String(msg.c_str());
+  writer.Key("cards");
+  writer.StartArray();
+
+
+  for (auto c : cards)
+  {
+    std::string cardJson = c->toJson();
+    writer.RawValue(cardJson.c_str(), cardJson.size(), rapidjson::kObjectType);
+    
+  }
+
+  writer.EndArray();
+  writer.EndObject();
+
+  // std::cout << s.GetString() << std::endl;
+
+  this->server->send(player, s.GetString());
+  int choice = this->server->getChoice(player);
+  return choice == -1 ? nullptr : cards[choice];
+}
+
+template<class C>
+inline std::vector<C*> Interface::selectCards(int player, std::string const& msg, std::vector<C*> const& cards){
+  using namespace rapidjson;
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
+
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("selectCards");
+  writer.Key("msg");
+  writer.String(msg.c_str());
+  writer.Key("cards");
+  writer.StartArray();
+
+
+  for (auto c : cards)
+  {
+    std::string cardJson = c->toJson();
+    writer.RawValue(cardJson.c_str(), cardJson.size(), rapidjson::kObjectType);
+    
+  }
+
+  writer.EndArray();
+  writer.EndObject();
+
+  // std::cout << s.GetString() << std::endl;
+
+  this->server->send(player, s.GetString());
+  auto choices = this->server->getMultiChoices(player);
+  std::cout << "choices : " << choices.size() << std::endl;
+  std::vector<C*> res(choices.size());
+  for(size_t i = 0; i < choices.size(); i++) {
+    res[i] = cards[choices[i]];
+  }
+  return res;
 }
