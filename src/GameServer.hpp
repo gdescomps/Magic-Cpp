@@ -3,6 +3,7 @@
 #include "Card.hpp"
 // #include "Game.hpp"
 #include "Duel.hpp"
+#include "../lib/httplib.hpp"
 
 class GameServer {
 
@@ -12,7 +13,10 @@ public:
 
     void send(std::string s);
 
-    void start();
+    void init();
+    void listen();
+
+    int getChoice();
 
 private:
     std::vector<Card*> deckP1, deckP2;
@@ -20,6 +24,10 @@ private:
     std::vector<Duel> duelHistory;
     std::vector<std::string> sendBuffer;
 
+    std::vector<int> choice;
+
     int currentPlayer;
+
+    httplib::Server svr;
 };
 

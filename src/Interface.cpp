@@ -45,7 +45,7 @@ int Interface::showMenu(std::string const &msg, std::vector<MenuEntry> choices)
 
   this->server->send(s.GetString());
 
-  return 1;
+  return this->server->getChoice();
 }
 
 

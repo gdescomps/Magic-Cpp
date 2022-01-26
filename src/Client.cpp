@@ -84,8 +84,13 @@ void Client::poll(){
 
       }
 
-      this->ui->showMenu(msg, menuEntries);
+      int choice = this->ui->showMenu(msg, menuEntries);
       
+      std::string request = "/choice/" + std::to_string(playerI) + "/" + std::to_string(choice);
+      if ( auto res = cli->Get(request.c_str()) ) {
+
+      }
+
     }
 
     else if(dataType.compare("card") == 0){
@@ -107,6 +112,10 @@ void Client::poll(){
 
 
   } else {
-    cout << "error code: " << res.error() << std::endl;
+
+    std::stringstream sstm;
+    sstm << " error code: " << res.error();
+
+    ui->tell(sstm.str());
   }
 }

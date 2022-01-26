@@ -8,29 +8,32 @@
 int main()
 {
     auto s = GameServer();
+    s.init();
+
         
     Interface iface(&s);
     // i.tell("test message");
 
     // std::cout << MenuEntry("Test choice", MenuEntry::State::NORMAL).toString() << std::endl;
 
-    // iface.showMenu("What to do?", {
-    //   "Show...",
-    //   MenuEntry("Place a Land", MenuEntry::State::DISABLED),
-    //   "Place a Creature",
-    //   MenuEntry("Attack", MenuEntry::State::NORMAL),
-    //   "Finish turn",
-    // });
+    int choice = iface.showMenu("What to do?", {
+      "Show...",
+      MenuEntry("Place a Land", MenuEntry::State::DISABLED),
+      "Place a Creature",
+      MenuEntry("Attack", MenuEntry::State::NORMAL),
+      "Finish turn",
+    });
 
-    AirBender c;
+    std::cout << "choice" << choice << std::endl;
 
-    iface.showCard(&c);
+    // AirBender c;
+
+    // iface.showCard(&c);
 
     // Land l(Mana::GREEN);
 
     // iface.showCard(&l);
 
-    s.start();
 
     return 0;
 

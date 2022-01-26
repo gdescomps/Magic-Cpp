@@ -21,7 +21,7 @@ public:
   std::string getType() const override;
   ManaCost getCost() const override;
 
-  virtual std::string getId() const {return "Land"; }
+  virtual std::string getId() const override {return "Land"; }
 
   virtual std::string toJson() const override {
     using namespace rapidjson;

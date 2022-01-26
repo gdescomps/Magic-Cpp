@@ -88,6 +88,7 @@ GameServer::GameServer() {
     this->deckP1 = res;
 
     this->sendBuffer = {"void", "void"};
+    this->choice = {-1, -1};
     this->currentPlayer = 0;
 
 }
@@ -97,10 +98,29 @@ GameServer::~GameServer(){}
 void GameServer::send(std::string s){
     this->sendBuffer[this->currentPlayer] = s;
     // std::cout << s << std::endl;
+    this->listen();
 }
 
-void GameServer::start(){
-    Server svr;
+int GameServer::getChoice() {
+    
+    this->choice[currentPlayer] = -2; // We want to receive from this player
+    
+    this->listen();
+
+    return this->choice[currentPlayer];
+
+}
+
+void GameServer::listen(){
+    std::cout << "Listening..." << std::endl;
+    svr.listen("0.0.0.0", 8080);
+}
+
+void GameServer::init(){
+    svr.set_logger([](const auto& req, const auto& res) {
+        std::cout << req.body.data() << std::endl;
+        std::cout << res.body.data() << std::endl;
+    });
 
     svr.Get("/hi", [](const Request &req, Response &res) {
         std::cout << req.body.data() << std::endl;
@@ -174,10 +194,28 @@ void GameServer::start(){
 
         // std::cout << req.body.data() << std::endl;
 
-        std::cout << this->sendBuffer[playerI] << std::endl;
+        // std::cout << this->sendBuffer[playerI] << std::endl;
 
         res.set_content(this->sendBuffer[playerI], "application/json");
+        svr.stop();
     });
+
+    svr.Get(R"(/choice/(\d+)/(\d+))", [&](const Request &req, Response &res) {
+        
+        int playerI = std::stoi(req.matches[1]);
+
+        if(this->choice[this->currentPlayer] == -2 && playerI == this->currentPlayer) { // We have a choice to receive for this player
+
+            int choice = std::stoi(req.matches[2]);
+
+            this->choice[playerI] = choice;
+
+            res.set_content("Player "+ std::to_string(playerI) + " selected " + std::to_string(choice), "text/plain");
+            svr.stop();
+        }
+
+    });
+
 
     // svr.Post("/duel", [&](const Request& req, Response& res) {
         
@@ -186,5 +224,6 @@ void GameServer::start(){
     //     res.set_content(result, "text/plain");
     // });
 
-    svr.listen("0.0.0.0", 8080);
+    
+    
 }
