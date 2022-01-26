@@ -6,11 +6,17 @@
 #include <sstream>
 #include <iostream>
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
 #include "Card.hpp"
 #include "Creature.hpp"
 #include "Land.hpp"
 
-class GameServer;
+#include "GameServer.hpp"
+
+// class GameServer;
 
 /** A menu entry. 
     Can be created from a string with default state of 'NORMAL', or also provide a state. */
@@ -95,7 +101,7 @@ private:
 template <class C>
 inline void Interface::showCard(C const *card)
 {
-  // int cardI = std::find(server->deckP1.begin(), server->deckP1.end(), card); 
-  
-  std::cout << card->getName() << " i:" << std::endl;
+
+  this->server->send(card->toJson());
+
 }

@@ -2,6 +2,9 @@
 
 #include "Mana.hpp"
 
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
 class Ability;
 
 /** A card. (abstract class) */
@@ -30,7 +33,33 @@ public:
   virtual ManaCost getCost() const = 0;
   virtual Mana getMana() const = 0;
   virtual std::vector<Ability const*> getAbilities() const { return {}; }
+
   virtual int getCardId() const = 0;
+
+  virtual std::string toJson() const {
+    
+    using namespace rapidjson;
+
+    int classId = this->getCardId();  
+
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+
+    writer.StartObject();
+    writer.Key("dataType");
+    writer.String("card");
+    writer.Key("type");
+    writer.Int(classId);
+    writer.Key("isTapped");
+    writer.Bool(this->isTapped());
+    writer.Key("state");
+    writer.Int(static_cast<int>(this->getState()));
+    writer.EndObject();
+
+    return s.GetString();
+    
+  }
+
 private:
   State state;
   bool tapped;

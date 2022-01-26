@@ -19,6 +19,8 @@ Client::Client(){
     this->cli = new httplib::Client("localhost", 8080);
     this->ui = new UserInterface();
 
+    this->playerI = 0; // TODO : Demander le numéro au serveur
+
   // if ( auto res = cli.Get("/attacker/4") ) {
   //   cout << res->status << endl;
   //   cout << res->get_header_value("Content-Type") << endl;
@@ -44,7 +46,9 @@ Client::~Client(){
 
 void Client::poll(){
 
-  if ( auto res = cli->Get("/poll/0") ) {
+  std::string request = "/poll/" + std::to_string(playerI);
+
+  if ( auto res = cli->Get(request.c_str()) ) {
     // cout << res->status << endl;
     // cout << res->get_header_value("Content-Type") << endl;
     // cout << res->body << endl;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Card.hpp"
-#include "Game.hpp"
+// #include "Game.hpp"
 #include "Duel.hpp"
 
 class GameServer {
