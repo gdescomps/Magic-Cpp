@@ -57,17 +57,17 @@ public:
   template<class C>
   void showCard(C const* c);
   
-//   /** Show cards details centered on the screen.
-//       Note: call hideAll() to hide */
-//   template<class C>
-//   void showCards(std::string const& msg, std::vector<C*> const& cards);
+  /** Show cards details centered on the screen.
+      Note: call hideAll() to hide */
+  template<class C>
+  void showCards(std::string const& msg, std::vector<C*> const& cards);
 
-//   /** Show a selector menu to select a single card in a list.
-//       @param msg a message to prompt the user.
-//       @param cards a list of cards to choose from.
-//       @return the selected card or nullptr if selection was cancelled. */  
-//   template<class C>
-//   C* selectCard(std::string const& msg, std::vector<C*> const& cards);
+  // /** Show a selector menu to select a single card in a list.
+  //     @param msg a message to prompt the user.
+  //     @param cards a list of cards to choose from.
+  //     @return the selected card or nullptr if selection was cancelled. */  
+  // template<class C>
+  // C* selectCard(std::string const& msg, std::vector<C*> const& cards);
 
 //   /** Show a selector menu to select a single card in a list.
 //       @param msg a message to prompt the user.
@@ -103,5 +103,37 @@ inline void Interface::showCard(C const *card)
 {
 
   this->server->send(card->toJson());
+
+}
+
+template<class C>
+inline void Interface::showCards(std::string const& msg, std::vector<C*> const& cards)
+{
+  using namespace rapidjson;
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
+
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("showCards");
+  writer.Key("msg");
+  writer.String(msg.c_str());
+  writer.Key("cards");
+  writer.StartArray();
+
+
+  for (auto c : cards)
+  {
+    std::string cardJson = c->toJson();
+    writer.RawValue(cardJson.c_str(), cardJson.size(), rapidjson::kObjectType);
+    
+  }
+
+  writer.EndArray();
+  writer.EndObject();
+
+  // std::cout << s.GetString() << std::endl;
+
+  this->server->send(s.GetString());
 
 }
