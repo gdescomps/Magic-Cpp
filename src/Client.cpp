@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include "UserInterface.hpp"
+#include "CardRegistry.hpp"
 
 using namespace std;
 using namespace rapidjson;
@@ -85,6 +86,18 @@ void Client::poll(){
 
       this->ui->showMenu(msg, menuEntries);
       
+    }
+
+    else if(dataType.compare("card") == 0){
+
+      int cardId = d["cardId"].GetInt();
+
+
+      // auto card = CardRegistry::getInst().create<Card>(cardId);
+      auto card = CardRegistry::getInst().create<Card>(1);
+
+      ui->showCard(card.get());
+
     }
 
 

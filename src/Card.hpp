@@ -40,7 +40,7 @@ public:
     
     using namespace rapidjson;
 
-    int classId = this->getCardId();  
+    int cardId = this->getCardId();  
 
     StringBuffer s;
     Writer<StringBuffer> writer(s);
@@ -48,8 +48,8 @@ public:
     writer.StartObject();
     writer.Key("dataType");
     writer.String("card");
-    writer.Key("type");
-    writer.Int(classId);
+    writer.Key("cardId");
+    writer.Int(cardId);
     writer.Key("isTapped");
     writer.Bool(this->isTapped());
     writer.Key("state");
