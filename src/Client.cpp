@@ -134,6 +134,7 @@ void Client::poll(){
 
       auto entries = d["cards"].GetArray();
       
+      std::vector<std::unique_ptr<Card>> ucards;
       std::vector<Card*> cards;
 
       for(SizeType i = 0; i < entries.Size() ; i++) {
@@ -152,21 +153,12 @@ void Client::poll(){
         std::string name = entries[i].GetObject()["id"].GetString();
 
         auto card = CardRegistry::getInst().create<Card>(name);
-      
-        card.get()->fromJson(cardJson);
-
-        ui->tell(card.get()->getName());
-
         cards.push_back(card.get());
-        // Card* ab = new AirBender();
-
-        // cards.push_back(ab);
-
-
+        ucards.push_back(move(card));
+      
       }
 
-      ui->showCards(msg, cards); // TODO : Erreur de segmentation
-
+      ui->showCards(msg, cards);
     }
 
 
