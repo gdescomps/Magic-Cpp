@@ -218,7 +218,7 @@ void Client::poll(){
           resp += std::to_string(std::ranges::find(cards, selected[i]) - cards.begin());
         } 
       }
-      std::string request = "/choice/" + std::to_string(playerI) + "/" + resp;
+      std::string request = "/multichoices/" + std::to_string(playerI) + "/" + resp;
       cli->Get(request.c_str());
     }
 

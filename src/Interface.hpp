@@ -198,7 +198,6 @@ inline std::vector<C*> Interface::selectCards(int player, std::string const& msg
 
   this->server->send(player, s.GetString());
   auto choices = this->server->getMultiChoices(player);
-  std::cout << "choices : " << choices.size() << std::endl;
   std::vector<C*> res(choices.size());
   for(size_t i = 0; i < choices.size(); i++) {
     res[i] = cards[choices[i]];

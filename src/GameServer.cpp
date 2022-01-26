@@ -65,7 +65,7 @@ std::vector<int> GameServer::getMultiChoices(int player) {
 
     while(this->choice[player] == -2)
         this->listen();
-
+    
     return this->multiChoices[player];
 
 }
@@ -183,6 +183,7 @@ void GameServer::init(){
         if(this->choice[player] == -2) { // We have choices to receive for this player
             
             this->multiChoices[player] = {};
+            this->choice[player] = -1;
 
             std::string s = req.matches[2];
 
@@ -199,7 +200,7 @@ void GameServer::init(){
                 this->multiChoices[player].push_back(choice);
 
             }
-
+            
             res.set_content("Player "+ std::to_string(player) + " selected " + std::to_string(this->multiChoices[player].size()) + " options", "text/plain");
             svr.stop();
         }
