@@ -8,13 +8,14 @@
 // #include "UserInterface.hpp"
 
 #include "Client.hpp"
-
+#include "CardRegistry.hpp"
 // using namespace std;
 // using namespace rapidjson;
 
 int main(void) {
+  CardRegistry::registerAllCards();
   Client c;
-  
+
   c.poll();
   return 0;
 }

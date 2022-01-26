@@ -10,7 +10,7 @@ Land::Land() : Land(Mana::BLACK) {}
 
 Mana Land::getMana() const { return mana; }
 
-std::string Land::getName() const { 
+std::string Land::getName() const {
   static std::array<std::string, 5> const names = {
     "Plains", "Island", "Swamp", "Mountain", "Forest"
   };
@@ -26,8 +26,3 @@ std::string Land::getType() const {
 }
 
 ManaCost Land::getCost() const { return ManaCost(); }
-
-int Land::getCardId() const {
-  static int id = CardRegistry::getInst().registerCard<Land>();
-  return id;
-}

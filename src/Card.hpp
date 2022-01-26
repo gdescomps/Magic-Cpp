@@ -19,14 +19,14 @@ public:
   virtual ~Card();
   Card(Card const&) = delete;
   Card& operator=(Card const&) = delete;
-  
+
   State getState() const;
   void setState(State state);
   void tap();
   void untap();
   bool isTapped() const;
   bool hasAbility(Ability const* ability) const;
-  
+
   virtual std::string getName() const = 0;
   virtual std::string getType() const = 0;
   virtual std::string getDesc() const { return "No description available."; }
@@ -34,13 +34,9 @@ public:
   virtual Mana getMana() const = 0;
   virtual std::vector<Ability const*> getAbilities() const { return {}; }
 
-  virtual int getCardId() const = 0;
-
   virtual std::string toJson() const {
-    
-    using namespace rapidjson;
 
-    int cardId = this->getCardId();  
+    using namespace rapidjson;
 
     StringBuffer s;
     Writer<StringBuffer> writer(s);
@@ -57,7 +53,7 @@ public:
     writer.EndObject();
 
     return s.GetString();
-    
+
   }
 
 private:

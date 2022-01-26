@@ -94,7 +94,7 @@ void Client::poll(){
 
 
       // auto card = CardRegistry::getInst().create<Card>(cardId);
-      auto card = CardRegistry::getInst().create<Card>(1);
+      auto card = CardRegistry::getInst().create<Card>("SerraAngel");
 
       ui->showCard(card.get());
 

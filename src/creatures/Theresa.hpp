@@ -6,13 +6,13 @@
 class Theresa : public Creature {
 
 public:
-  
+
   Theresa(): Creature(0, 10) {}
-  
+
   std::string getName() const override { return "Theresa"; }
   std::string getType() const override { return Creature::getType() + " - Ent"; }
   std::string getDesc() const override { return "A large oak tree."; }
-  
+
   ManaCost getCost() const override {
     ManaCost cost;
     cost.setAny(1);
@@ -23,10 +23,4 @@ public:
   Mana getMana() const override {
     return Mana::GREEN;
   }
-  
-  int getCardId() const override {
-    static int id = CardRegistry::getInst().registerCard<Theresa>();
-    return id;
-  }
 };
-
