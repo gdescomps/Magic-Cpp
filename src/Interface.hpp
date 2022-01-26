@@ -62,12 +62,12 @@ public:
   template<class C>
   void showCards(std::string const& msg, std::vector<C*> const& cards);
 
-  // /** Show a selector menu to select a single card in a list.
-  //     @param msg a message to prompt the user.
-  //     @param cards a list of cards to choose from.
-  //     @return the selected card or nullptr if selection was cancelled. */  
-  // template<class C>
-  // C* selectCard(std::string const& msg, std::vector<C*> const& cards);
+  /** Show a selector menu to select a single card in a list.
+      @param msg a message to prompt the user.
+      @param cards a list of cards to choose from.
+      @return the selected card or nullptr if selection was cancelled. */  
+  template<class C>
+  C* selectCard(std::string const& msg, std::vector<C*> const& cards);
 
 //   /** Show a selector menu to select a single card in a list.
 //       @param msg a message to prompt the user.
@@ -136,4 +136,9 @@ inline void Interface::showCards(std::string const& msg, std::vector<C*> const& 
 
   this->server->send(s.GetString());
 
+}
+
+template<class C>
+inline C* Interface::selectCard(std::string const& msg, std::vector<C*> const& cards){
+  
 }

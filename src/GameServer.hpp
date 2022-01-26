@@ -17,6 +17,7 @@ public:
     void listen();
 
     int getChoice();
+    std::vector<int> getMultiChoices();
 
 private:
     std::vector<Card*> deckP1, deckP2;
@@ -25,6 +26,7 @@ private:
     std::vector<std::string> sendBuffer;
 
     std::vector<int> choice;
+    std::vector<std::vector<int>> multiChoices;
 
     int currentPlayer;
 

@@ -9,6 +9,7 @@
 #include <string>
 #include "UserInterface.hpp"
 #include "CardRegistry.hpp"
+#include "creatures/AirBender.hpp"
 
 using namespace std;
 using namespace rapidjson;
@@ -124,6 +125,47 @@ void Client::poll(){
       // ui->tell("testdsiuh");
 
       ui->showCard(card.get());
+
+    }
+
+    else if(dataType.compare("showCards") == 0){
+
+      string msg = d["msg"].GetString();
+
+      auto entries = d["cards"].GetArray();
+      
+      std::vector<Card*> cards;
+
+      for(SizeType i = 0; i < entries.Size() ; i++) {
+
+        rapidjson::StringBuffer buffer;
+
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        entries[i].Accept(writer);
+
+        rapidjson::Document result;
+        rapidjson::StringStream s(buffer.GetString());
+        result.ParseStream(s);
+
+        std::string cardJson = buffer.GetString();
+
+        std::string name = entries[i].GetObject()["id"].GetString();
+
+        auto card = CardRegistry::getInst().create<Card>(name);
+      
+        card.get()->fromJson(cardJson);
+
+        ui->tell(card.get()->getName());
+
+        cards.push_back(card.get());
+        // Card* ab = new AirBender();
+
+        // cards.push_back(ab);
+
+
+      }
+
+      ui->showCards(msg, cards); // TODO : Erreur de segmentation
 
     }
 

@@ -61,4 +61,4 @@ client: $(CLIENT_OBJS) src/client_main.cpp
 clean:
 	rm -f bin/*.o
 	rm -f bin/magic
-	rm -f bin/server bin/server_test
+	rm -f bin/server_test

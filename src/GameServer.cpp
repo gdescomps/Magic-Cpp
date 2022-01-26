@@ -89,6 +89,8 @@ GameServer::GameServer() {
 
     this->sendBuffer = {"void", "void"};
     this->choice = {-1, -1};
+    this->multiChoices = {std::vector<int>(),std::vector<int>()};
+
     this->currentPlayer = 0;
 
 }
@@ -110,6 +112,17 @@ int GameServer::getChoice() {
     return this->choice[currentPlayer];
 
 }
+
+std::vector<int> GameServer::getMultiChoices(){
+
+    this->choice[currentPlayer] = -2; // We want to receive from this player
+
+    this->listen();
+
+    return this->multiChoices[currentPlayer];
+
+}
+
 
 void GameServer::listen(){
     std::cout << "Listening..." << std::endl;
@@ -211,6 +224,34 @@ void GameServer::init(){
             this->choice[playerI] = choice;
 
             res.set_content("Player "+ std::to_string(playerI) + " selected " + std::to_string(choice), "text/plain");
+            svr.stop();
+        }
+
+    });
+
+    svr.Get(R"(/multichoices/(\d+)/(\d+(,\d+)*))", [&](const Request &req, Response &res) {
+        
+        int playerI = std::stoi(req.matches[1]);
+
+        if(this->choice[this->currentPlayer] == -2 && playerI == this->currentPlayer) { // We have choices to receive for this player
+
+            std::string s = req.matches[2];
+
+            std::regex word_regex("(\\d+)");
+            auto words_begin = 
+                std::sregex_iterator(s.begin(), s.end(), word_regex);
+            auto words_end = std::sregex_iterator();
+                        
+            for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+                std::smatch match = *i;
+                std::string match_str = match.str();
+                int choice = std::stoi(match_str);
+
+                this->multiChoices[playerI].push_back(choice);
+
+            }
+
+            res.set_content("Player "+ std::to_string(playerI) + " selected " + std::to_string(this->multiChoices[playerI].size()) + " options", "text/plain");
             svr.stop();
         }
 
