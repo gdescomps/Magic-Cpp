@@ -28,9 +28,4 @@ public:
   std::string getDesc() const override {
     return "Cannot be attacked or inflict damage to " + manaToString(M) + " creatures.";
   }
-  
-  static ColorImmunity<M>* getInst() {
-    static ColorImmunity<M> inst;
-    return &inst;
-  }
 };

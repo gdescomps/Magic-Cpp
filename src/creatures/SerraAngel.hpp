@@ -14,7 +14,6 @@ public:
   std::string getName() const override { return "Serra Angel"; }
   std::string getType() const override { return Creature::getType() + " - Angel"; }
 
-
   ManaCost getCost() const override {
     ManaCost cost;
     cost.setAny(3);

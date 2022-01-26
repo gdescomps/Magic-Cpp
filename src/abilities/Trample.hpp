@@ -11,20 +11,11 @@ public:
   }
   
   std::string getDesc() const override {
-    return "Deal excess damage to adversary";
+    return "Deal excess damage to adversary.";
   }
-  
-  
-  void usePostDuel(Duel& duel, Creature* creature) override {
-    if(creature == duel.attacker) {
-      auto hp = duel.adversary->getHP();
-      duel.adversary->setHP(std::max(0, hp - creature->getPower()));
-    }
-  }
-  
-  static Trample* getInst() {
-    static Trample inst;
-    return &inst;
+    
+  void usePostDuelAttack(Duel& duel) override {
+    duel.adversary->addHP(-std::max(0, duel.attacker->getPower()));
   }
 };
 

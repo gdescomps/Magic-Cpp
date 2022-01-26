@@ -1,20 +1,23 @@
 #pragma once
 
+#include <algorithm>
+
 #include "../Ability.hpp"
 #include "../Duel.hpp"
+#include "../Creature.hpp"
+#include "Reach.hpp"
 
-class Menace : public Ability {
+class Unblockable : public Ability {
 public:
   bool validateAttack(Duel const& duel) override {
-    return duel.blockers.size() != 1;
+    return duel.blockers.size() == 0;
   }
   
   std::string getName() const override {
-    return "Menace";
+    return "Unblockable";
   }
   
   std::string getDesc() const override {
-    return "cannot be blocked by a single creature.";
+    return "Cannot be blocked.";
   }
 };
-

@@ -10,11 +10,6 @@ public:
   }
   
   std::string getDesc() const override {
-    return "Can be used directly when placed";
-  }
-  
-  static Haste* getInst() {
-    static Haste inst;
-    return &inst;
+    return "Can be used directly when placed.";
   }
 };

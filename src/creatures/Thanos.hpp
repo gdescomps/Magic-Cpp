@@ -6,11 +6,11 @@
 #include "../abilities/DeathTouch.hpp"
 #include "../abilities/Flying.hpp"
 #include "../abilities/ColorImmunity.hpp"
-#include "../abilities/Defender.hpp"
 #include "../abilities/Haste.hpp"
 #include "../abilities/Menace.hpp"
 #include "../abilities/Reach.hpp"
 #include "../abilities/Trample.hpp"
+#include "../abilities/Unblockable.hpp"
 #include "../abilities/Vigilance.hpp"
  
 
@@ -23,11 +23,11 @@ public:
     DeathTouch,
     Flying,
     ColorImmunity<Mana::RED>,
-    Defender,
     Haste,
     Menace,
     Reach,
     Trample,
+    Unblockable,
     Vigilance>()) {}
   
   std::string getName() const override { return "Thanos"; }

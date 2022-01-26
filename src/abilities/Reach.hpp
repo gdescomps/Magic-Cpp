@@ -11,11 +11,6 @@ public:
   std::string getDesc() const override {
     return "Can block Flying creatures.";
   }
-  
-  static Reach* getInst() {
-    static Reach inst;
-    return &inst;
-  }
 };
 
 

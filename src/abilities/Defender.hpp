@@ -16,11 +16,6 @@ public:
   std::string getDesc() const override {
     return "Cannot attack.";
   }
-  
-  static Defender* getInst() {
-    static Defender inst;
-    return &inst;
-  }
 };
 
 

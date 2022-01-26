@@ -23,6 +23,7 @@ public:
 
   int getHP() const { return hp; }
   void setHP(int hp) { this->hp = hp; }
+  void addHP(int hp) { this->hp += hp; }
   
   template<class C>
   std::vector<C*> getCardsInState(Card::State state);

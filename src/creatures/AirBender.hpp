@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../Creature.hpp"
+#include "../abilities/Unblockable.hpp"
 
 class AirBender : public Creature {
 
 public:
   
-  AirBender(): Creature(1, 5) {}
+  AirBender(): Creature(1, 5, make_abilities<Unblockable>()) {}
   
   std::string getName() const override { return "Air Bender"; }
   std::string getType() const override { return Creature::getType() + " - Witch"; }

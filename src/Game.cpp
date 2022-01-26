@@ -49,6 +49,17 @@ std::vector<std::unique_ptr<Card>> makePlayer1Deck() {
   res.push_back(std::make_unique<Theresa>());
   res.push_back(std::make_unique<Tau>());
   res.push_back(std::make_unique<Thanos>());
+  res.push_back(std::make_unique<AirBender>());
+  res.push_back(std::make_unique<BrandonSoupSirup>());
+  res.push_back(std::make_unique<CrownTheVirulent>());
+  res.push_back(std::make_unique<JackSeparou>());
+  res.push_back(std::make_unique<LeojTheMerciful>());
+  res.push_back(std::make_unique<PolyNinja>());
+  res.push_back(std::make_unique<RatMan>());
+  res.push_back(std::make_unique<SerraAngel>());
+  res.push_back(std::make_unique<Theresa>());
+  res.push_back(std::make_unique<Tau>());
+  res.push_back(std::make_unique<Thanos>());
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
   res.push_back(std::make_unique<Land>(Mana::BLACK));
@@ -105,7 +116,7 @@ Game::Game()
   for(Land* land : player2.getCards<Land>()) {
     land->setState(Card::State::BATTLEFIELD);
   }
-  for(size_t i = 0; i < 4; i++) {
+  for(size_t i = 0; i < 11; i++) {
     player1.getCardsInState<Creature>(Card::State::LIBRARY).at(0)->setState(Card::State::BATTLEFIELD);
     player2.getCardsInState<Creature>(Card::State::LIBRARY).at(0)->setState(Card::State::BATTLEFIELD);
   }
@@ -309,18 +320,10 @@ bool Game::attackPhase(Player* player) {
     if(duel.attacker->hasAbility<Vigilance>())
       duel.attacker->tap();
     
-    // reset cards stats
-    duel.attacker->setPower(duel.attacker->getBasePower());
-    duel.attacker->setToughness(duel.attacker->getBaseToughness());
-    for(Creature* blocker : duel.blockers) {
-      blocker->setPower(blocker->getBasePower());
-      blocker->setToughness(blocker->getBaseToughness());
-    }
-    
     // Move dead blockers to Graveyard
     std::vector<Creature*> deadBlockers = duel.blockers;
-    std::erase_if(deadBlockers, [] (Creature* blocker) {
-      return !(blocker->getToughness() == 0);
+    std::erase_if(deadBlockers, [&] (Creature* blocker) {
+      return blocker->isAlive();
     });
 
     if(deadBlockers.size() > 0) {
@@ -338,6 +341,14 @@ bool Game::attackPhase(Player* player) {
     if(duel.attacker->getToughness() == 0) {
       iface.tell(p1Name + " lost it's " + duel.attacker->getName() + " against " + p2Name +"'s blocker(s) !");
       duel.attacker->setState(Card::State::GRAVEYARD);
+    }
+    
+    // reset cards stats
+    duel.attacker->setPower(duel.attacker->getBasePower());
+    duel.attacker->setToughness(duel.attacker->getBaseToughness());
+    for(Creature* blocker : duel.blockers) {
+      blocker->setPower(blocker->getBasePower());
+      blocker->setToughness(blocker->getBaseToughness());
     }
   }
     

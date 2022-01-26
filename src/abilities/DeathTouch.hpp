@@ -14,15 +14,19 @@ public:
     return "Can block Flying creatures.";
   }
   
-  void usePostAttack(Duel&, Creature* blocker) override {
-    blocker->setToughness(0);
+  void usePreAttack(Duel& duel, Creature* blocker) override {
+    if(duel.attacker->getPower() > 0) {
+      attacked.push_back(blocker);
+    }
   }
   
-  static DeathTouch* getInst() {
-    static DeathTouch inst;
-    return &inst;
+  void usePostDuelAttack(Duel&) override {
+    for(Creature* c : attacked) {
+      c->setToughness(0);
+    }
+    attacked = {};
   }
+  
+private:
+  std::vector<Creature*> attacked;
 };
-
-
-
