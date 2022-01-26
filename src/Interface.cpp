@@ -48,4 +48,31 @@ int Interface::showMenu(std::string const &msg, std::vector<MenuEntry> choices)
   return this->server->getChoice();
 }
 
+bool Interface::promptYesNo(std::string const &msg)
+{
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
 
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("promptYesNo");
+  writer.Key("msg");
+  writer.String(msg.c_str());
+  writer.EndObject();
+
+  this->server->send(s.GetString());
+
+  return this->server->getChoice() == 1;
+}
+
+void Interface::hideAll(){
+  StringBuffer s;
+  Writer<StringBuffer> writer(s);
+
+  writer.StartObject();
+  writer.Key("dataType");
+  writer.String("hideAll");
+  writer.EndObject();
+
+  this->server->send(s.GetString());
+}

@@ -93,6 +93,23 @@ void Client::poll(){
 
     }
 
+    else if(dataType.compare("promptYesNo") == 0){
+
+      string msg = d["msg"].GetString();
+
+      int choice = this->ui->promptYesNo(msg) ? 1 : 0;
+      
+      std::string request = "/choice/" + std::to_string(playerI) + "/" + std::to_string(choice);
+      if ( auto res = cli->Get(request.c_str()) ) {
+
+      }
+
+    }
+
+    else if(dataType.compare("hideAll") == 0){
+      ui->hideAll();
+    }
+
     else if(dataType.compare("card") == 0){
 
       std::string name = d["id"].GetString();

@@ -76,16 +76,16 @@ public:
 //   template<class C>
 //   std::vector<C*> selectCards(std::string const& msg, std::vector<C*> const& cards);
   
-//   /** Hide content drawn on the main screen (not the header nor the prompt). */
-//   void hideAll();
+  /** Hide content drawn on the main screen (not the header nor the prompt). */
+  void hideAll();
   
-//   /** Tell a message to the user. */
+  /** Tell a message to the user. */
   void tell(std::string const& msg);
 
-//   /** Ask a yes / no question to the user. 
-//       @param msg the question to ask.
-//       @return true if answer was 'yes', false if answer was 'no'. */
-//   bool promptYesNo(std::string const& msg);
+  /** Ask a yes / no question to the user. 
+      @param msg the question to ask.
+      @return true if answer was 'yes', false if answer was 'no'. */
+  bool promptYesNo(std::string const& msg);
 
   /** Show a menu. 
       @param msg the displayed menu name.
